@@ -1,0 +1,30 @@
+{
+  "name": "youarei.js",
+  "version": "0.0.0",
+  "description": "URI specialist",
+  "main": "youarei.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "karma start"
+  },
+  "keywords": [
+    "uri",
+    "url",
+    "query",
+    "querystring"
+  ],
+  "author": "Simon Elliott",
+  "license": "BSD-2-Clause",
+  "devDependencies": {
+    "karma-mocha": "~0.1.0",
+    "karma-chai": "0.0.2",
+    "karma-phantomjs-launcher": "~0.1.0",
+    "karma-coffee-preprocessor": "~0.1.0",
+    "karma-ng-html2js-preprocessor": "~0.1.0",
+    "karma-ng-scenario": "~0.1.0",
+    "grunt": "~0.4.2",
+    "grunt-karma": "~0.6.2"
+  }
+}
