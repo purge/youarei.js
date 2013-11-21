@@ -1,4 +1,5 @@
 describe 'new YouAreI()', ->
+  ex_uri = "http://www.example.com"
 
   it 'Should accept plain URI', ->
     uri = new YouAreI("http://www.example.com")
@@ -46,19 +47,24 @@ describe 'new YouAreI()', ->
       assert.deepEqual uri.query_array(), { d: [1,1], e: [1] }
 
       it 'should replace', ->
-        #example http://test.com/?a=b
-        uri.query({a: "b"})
+        #example http://test.com/?e=1&d=9
+        uri.query({d: 9})
+        assert.equal uri.query("d", 9), "", "accept as simple pair"
 
       it 'should merge', ->
-        #example http://test.com/?a=b&b=b&c=b
-        uri.query_merge({b: "b", c: "b" })
+        #example http://test.com/?d=1&e=1&d=1&e=5&d=9
+        uri.query_merge({d: 9, e: 5 })
 
       it 'should append', ->
-        #example http://test.com/?a=b&a=b
-        uri.query_append({ "a": "b" })
+        #example http://test.com/?d=1&e=1&d=1&a=b
+        uri.query_append({ a: "b" })
 
       it 'should append, multi', ->
-        #example http://test.com/?a=b&a=b&a=c
+        #example http://test.com/?d=1&e=1&d=1&a=b&a=b&a=c
         uri.query_append({ "a": ["b","c"] })
+
+      it 'should remove', ->
+        #example http://test.com/?a=b&a=b&a=c
+        uri.query_append({ d: null })
 
 
