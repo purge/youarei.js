@@ -44,31 +44,32 @@ describe 'new YouAreI()', ->
       assert.equal uri.fragment(), "fragment"
 
     describe 'query()', ->
-      assert.equal uri.query(), "d=1&e=1&d=1"
+      assert.equal uri.query().stringify(), "d=1&e=1&d=1"
 
-    describe 'params()', ->
+    describe 'update query()', ->
       #example http://test.com/?a=1
-      assert.deepEqual uri.params(), { d: [1,1], e: 1 }
-      assert.deepEqual uri.params_array(), { d: [1,1], e: [1] }
+      assert.deepEqual uri.query().params(), { d: ['1','1'], e: '1' }
+      assert.deepEqual uri.query().params_array(), { d: ['1','1'], e: ['1'] }
 
       it 'should replace', ->
         #example http://test.com/?e=1&d=9
+        #shortcut to .replace()
         assert.equal uri.query({d: 9}), "", "takes dict"
         assert.equal uri.query("d", 9), "", "accept as simple pair"
 
       it 'should merge', ->
         #example http://test.com/?d=1&e=1&d=1&e=5&d=9
-        uri.query_merge({d: 9, e: 5 })
+        uri.query().merge({d: 9, e: 5 })
 
       it 'should append', ->
         #example http://test.com/?d=1&e=1&d=1&a=b
-        uri.query_append({ a: "b" })
+        uri.query().append({ a: "b" })
 
       it 'should append, multi', ->
         #example http://test.com/?d=1&e=1&d=1&a=b&a=b&a=c
-        uri.query_append({ "a": ["b","c"] })
+        uri.query().append({ "a": ["b","c"] })
 
       it 'should remove', ->
         #example http://test.com/?a=b&a=b&a=c
-        uri.query_append({ d: null })
+        uri.query({ d: null })
 

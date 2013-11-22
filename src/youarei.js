@@ -28,44 +28,14 @@ YouAreI.prototype = {
   },
 
   //returns the raw query string
-  query: function(query) {
-    //if string, set as raw
-    if(query !== undefined) {
-      this._query = query;
-      return this;
-
-    //if list, set key values
-    
-    //if object, replace
+  query: function() {
+    var args = Array.prototype.slice.call(arguments);
+    if(this._query) {
+      this._query.parse(args);
     } else {
-      return this._query;
+      this._query = new YouAreIParameters(args);
     }
-  },
-
-  //returns parsed query string as object
-  params: function() {
-
-    var params = [];
-    var pairs = this._query.split(/&|;/);
-
-    pairs.forEach(function(pair) {
-      var n_pair, name, value;
-      if(n_pair = pair.match(qp_re)) {
-        var tmp = {};
-        name = decodeURIComponent(n_pair[1].replace(pl_re, " "));
-        value = decodeURIComponent(n_pair[2].replace(pl_re, " "));
-        tmp[name] = value;
-        params.push( tmp );
-      } else {
-        return;
-      }
-    });
-    return params;
-  },
-
-  //returns parsed query string as object, value *always* array
-  params_array: function() {
-
+    return args.length ? this : this._query;
   },
 
   userinfo: function(userinfo) {
