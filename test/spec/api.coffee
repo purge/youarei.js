@@ -3,6 +3,7 @@ describe 'new YouAreI()', ->
 
   it 'Should accept plain URI', ->
     uri = new YouAreI("http://www.example.com")
+    console.log(uri.scheme())
     assert.ok uri
 
   it 'Should accept schemeless URI', ->
@@ -19,16 +20,16 @@ describe 'new YouAreI()', ->
     uri = new YouAreI(ex_uri).params({a: "b"})
 
   describe 'methods', ->
-    uri = null
+    uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
 
     beforeEach ->
-      uri = new YouAreI("http://user@host:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1")
+      uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
 
     describe 'scheme()', ->
-      assert.equal uri.scheme(), "https"
+      assert.equal uri.scheme(), "http"
 
     describe 'userinfo()', ->
-      assert.equal uri.userinfo(), "user@host:pass"
+      assert.equal uri.userinfo(), "user:pass"
 
     describe 'host()', ->
       assert.equal uri.host(), "www.example.com"
@@ -39,7 +40,8 @@ describe 'new YouAreI()', ->
     describe 'path()', ->
       assert.equal uri.path(), "/a/b/c"
 
-    #describe 'fragment()', ->
+    describe 'fragment()', ->
+      assert.equal uri.fragment(), "fragment"
 
     describe 'query()', ->
       #example http://test.com/?a=1
