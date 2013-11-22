@@ -44,13 +44,16 @@ describe 'new YouAreI()', ->
       assert.equal uri.fragment(), "fragment"
 
     describe 'query()', ->
+      assert.equal uri.query(), "d=1&e=1&d=1"
+
+    describe 'params()', ->
       #example http://test.com/?a=1
-      assert.deepEqual uri.query(), { d: [1,1], e: 1 }
-      assert.deepEqual uri.query_array(), { d: [1,1], e: [1] }
+      assert.deepEqual uri.params(), { d: [1,1], e: 1 }
+      assert.deepEqual uri.params_array(), { d: [1,1], e: [1] }
 
       it 'should replace', ->
         #example http://test.com/?e=1&d=9
-        uri.query({d: 9})
+        assert.equal uri.query({d: 9}), "", "takes dict"
         assert.equal uri.query("d", 9), "", "accept as simple pair"
 
       it 'should merge', ->
@@ -68,5 +71,4 @@ describe 'new YouAreI()', ->
       it 'should remove', ->
         #example http://test.com/?a=b&a=b&a=c
         uri.query_append({ d: null })
-
 

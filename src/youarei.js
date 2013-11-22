@@ -27,28 +27,38 @@ YouAreI.prototype = {
     }
   },
 
+  //returns the raw query string
   query: function(query) {
     if(query !== undefined) {
       this._query = query;
       return this;
     } else {
-      var params = [];
-      var pairs = this._query.split(/&|;/);
-
-      pairs.forEach(function(pair) {
-        var n_pair, name, value;
-        if(n_pair = pair.match(qp_re)) {
-          var tmp = {};
-          name = decodeURIComponent(n_pair[1].replace(pl_re, " "));
-          value = decodeURIComponent(n_pair[2].replace(pl_re, " "));
-          tmp[name] = value;
-          params.push( tmp );
-        } else {
-          return;
-        }
-      });
-      return this._query = params;
+      return this._query;
     }
+  },
+
+  params: function() {
+
+    var params = [];
+    var pairs = this._query.split(/&|;/);
+
+    pairs.forEach(function(pair) {
+      var n_pair, name, value;
+      if(n_pair = pair.match(qp_re)) {
+        var tmp = {};
+        name = decodeURIComponent(n_pair[1].replace(pl_re, " "));
+        value = decodeURIComponent(n_pair[2].replace(pl_re, " "));
+        tmp[name] = value;
+        params.push( tmp );
+      } else {
+        return;
+      }
+    });
+    return params;
+  },
+
+  params_array: function() {
+
   },
 
   userinfo: function(userinfo) {
