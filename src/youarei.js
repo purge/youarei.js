@@ -29,14 +29,20 @@ YouAreI.prototype = {
 
   //returns the raw query string
   query: function(query) {
+    //if string, set as raw
     if(query !== undefined) {
       this._query = query;
       return this;
+
+    //if list, set key values
+    
+    //if object, replace
     } else {
       return this._query;
     }
   },
 
+  //returns parsed query string as object
   params: function() {
 
     var params = [];
@@ -57,6 +63,7 @@ YouAreI.prototype = {
     return params;
   },
 
+  //returns parsed query string as object, value *always* array
   params_array: function() {
 
   },
