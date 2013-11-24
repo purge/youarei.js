@@ -21,10 +21,13 @@
     "karma-mocha": "~0.1.0",
     "karma-chai": "0.0.2",
     "karma-phantomjs-launcher": "~0.1.0",
-    "karma-coffee-preprocessor": "~0.1.0",
-    "karma-ng-html2js-preprocessor": "~0.1.0",
-    "karma-ng-scenario": "~0.1.0",
-    "grunt": "~0.4.2",
-    "grunt-karma": "~0.6.2"
+    "karma-coffee-preprocessor": "~0.1.0"
+  },
+  "dependencies": {
+    "uglifyjs": "~2.3.6",
+    "browserify": "~2.35.4"
+  },
+  "scripts": {
+    "build-js": "browserify src/youarei.js | uglifyjs -mc > dist/youarei.js",
   }
 }

@@ -26,6 +26,9 @@ describe 'new YouAreI()', ->
     beforeEach ->
       uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
 
+    describe 'stringify()', ->
+      assert.equal uri.stringify(), "http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment"
+
     describe 'scheme()', ->
       assert.equal uri.scheme(), "http"
 
@@ -55,11 +58,9 @@ describe 'new YouAreI()', ->
       describe 'set()', ->
         it 'replaced using pair', ->
           assert.equal uri.query.set("d", 10).stringify(), "d=10"
+
         it 'replaced using object', ->
           assert.equal uri.query.set({d: 9, e: 10}).stringify(), "d=9&e=10"
-
-        it 'should remove', ->
-          assert.equal uri.query.set({ d: null }).stringify(), "e=10"
 
         it 'should clear using set()', ->
           assert.equal uri.query.set().stringify(), ""
@@ -72,11 +73,15 @@ describe 'new YouAreI()', ->
         it 'should merge', ->
           assert.equal uri.query.merge({d: 9, e: 5 }).stringify(), "d=1&e=1&d=1&e=5&d=9"
 
+        it 'should remove', ->
+          assert.equal uri.query.set({ d: null }).stringify(), "e=1&e=5&d=9"
+
+
       describe 'append()', ->
         it 'should append', ->
-          assert.equal uri.query.append({a: b }).stringify(), "d=1&e=1&d=1&a=b"
+          assert.equal uri.query.append({a: "b" }).stringify(), "d=1&e=1&d=1&a=b"
 
         it 'should append, multi', ->
-          assert.equal uri.query.append({ "a": ["c","d"] }).stringify(), "d=1&e=1&d=1&a=b"
+          assert.equal uri.query.append({ "a": ["c","d"] }).stringify(), "d=1&e=1&d=1&a=c&a=d"
 
 
