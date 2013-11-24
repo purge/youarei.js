@@ -2,18 +2,18 @@ describe 'new YouAreI()', ->
   ex_uri = "http://www.example.com"
 
   it 'Should accept plain URI', ->
-    uri = new YouAreI("http://www.example.com")
+    uri = new YouAreI ex_uri
     assert.instanceOf uri, YouAreI, "URI"
 
   it 'Should accept schemeless URI', ->
-    uri = new YouAreI("www.example.com")
+    uri = new YouAreI "www.example.com"
     assert.ok uri
 
   it 'Should accept empty URI', ->
     uri = new YouAreI()
     assert.ok uri
 
-  it 'Throw exception on malformed URIs', ->
+  xit 'Throw exception on malformed URIs', ->
 
   xit 'Should be chainable', ->
     #TODO: decide whether query should return YouAreI object
@@ -53,29 +53,30 @@ describe 'new YouAreI()', ->
         assert.deepEqual uri.query.get_all(), { d: ['1','1'], e: ['1'] }
 
       describe 'set()', ->
-        it 'should replace', ->
-          assert.equal uri.query.set("d", 10).stringify(), "d=10", "accept as simple pair"
-          assert.equal uri.query.set({d: 9, e: 10}).stringify(), "d=9&e=10", "replaced using obj"
+        it 'replaced using pair', ->
+          assert.equal uri.query.set("d", 10).stringify(), "d=10"
+        it 'replaced using object', ->
+          assert.equal uri.query.set({d: 9, e: 10}).stringify(), "d=9&e=10"
 
         it 'should remove', ->
-          assert.equal uri.query.set({ d: null }).stringify(), "e=10", "cleared using obj"
+          assert.equal uri.query.set({ d: null }).stringify(), "e=10"
 
         it 'should clear using set()', ->
-          assert.equal uri.query.set().stringify(), "", "empty set"
+          assert.equal uri.query.set().stringify(), ""
 
       describe 'clear()', ->
         it 'should clear using clear()', ->
-          assert.equal uri.query.clear().stringify(), "", "clear"
+          assert.equal uri.query.clear().stringify(), ""
 
       describe 'merge()', ->
         it 'should merge', ->
-          assert.equal uri.query.merge({d: 9, e: 5 }).stringify(), "d=1&e=1&d=1&e=5&d=9", "merged"
+          assert.equal uri.query.merge({d: 9, e: 5 }).stringify(), "d=1&e=1&d=1&e=5&d=9"
 
       describe 'append()', ->
         it 'should append', ->
-          assert.equal uri.query.append({a: b }).stringify(), "d=1&e=1&d=1&a=b", "appended"
+          assert.equal uri.query.append({a: b }).stringify(), "d=1&e=1&d=1&a=b"
 
         it 'should append, multi', ->
-          assert.equal uri.query.append({ "a": ["c","d"] }).stringify(), "d=1&e=1&d=1&a=b", "appended"
+          assert.equal uri.query.append({ "a": ["c","d"] }).stringify(), "d=1&e=1&d=1&a=b"
 
 
