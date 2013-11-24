@@ -3,8 +3,7 @@ describe 'new YouAreI()', ->
 
   it 'Should accept plain URI', ->
     uri = new YouAreI("http://www.example.com")
-    console.log(uri.scheme())
-    assert.ok uri
+    assert.instanceOf uri, YouAreI, "URI"
 
   it 'Should accept schemeless URI', ->
     uri = new YouAreI("www.example.com")
@@ -16,8 +15,10 @@ describe 'new YouAreI()', ->
 
   it 'Throw exception on malformed URIs', ->
 
-  it 'Should be chainable', ->
-    uri = new YouAreI(ex_uri).params({a: "b"})
+  xit 'Should be chainable', ->
+    #TODO: decide whether query should return YouAreI object
+    uri = new YouAreI(ex_uri).query.set({a: "b"})
+    assert.instanceOf uri, YouAreI, "URI"
 
   describe 'methods', ->
     uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
@@ -43,33 +44,38 @@ describe 'new YouAreI()', ->
     describe 'fragment()', ->
       assert.equal uri.fragment(), "fragment"
 
-    describe 'query()', ->
-      assert.equal uri.query().stringify(), "d=1&e=1&d=1"
+    describe 'query', ->
+      describe 'stringify()', ->
+        assert.equal uri.query.stringify(), "d=1&e=1&d=1"
 
-    describe 'update query()', ->
-      #example http://test.com/?a=1
-      assert.deepEqual uri.query().params(), { d: ['1','1'], e: '1' }
-      assert.deepEqual uri.query().params_array(), { d: ['1','1'], e: ['1'] }
+      describe 'get(), get_all()', ->
+        assert.deepEqual uri.query.get(), { d: ['1','1'], e: '1' }
+        assert.deepEqual uri.query.get_all(), { d: ['1','1'], e: ['1'] }
 
-      it 'should replace', ->
-        #example http://test.com/?e=1&d=9
-        #shortcut to .replace()
-        assert.equal uri.query({d: 9}), "", "takes dict"
-        assert.equal uri.query("d", 9), "", "accept as simple pair"
+      describe 'set()', ->
+        it 'should replace', ->
+          assert.equal uri.query.set("d", 10).stringify(), "d=10", "accept as simple pair"
+          assert.equal uri.query.set({d: 9, e: 10}).stringify(), "d=9&e=10", "replaced using obj"
 
-      it 'should merge', ->
-        #example http://test.com/?d=1&e=1&d=1&e=5&d=9
-        uri.query().merge({d: 9, e: 5 })
+        it 'should remove', ->
+          assert.equal uri.query.set({ d: null }).stringify(), "e=10", "cleared using obj"
 
-      it 'should append', ->
-        #example http://test.com/?d=1&e=1&d=1&a=b
-        uri.query().append({ a: "b" })
+        it 'should clear using set()', ->
+          assert.equal uri.query.set().stringify(), "", "empty set"
 
-      it 'should append, multi', ->
-        #example http://test.com/?d=1&e=1&d=1&a=b&a=b&a=c
-        uri.query().append({ "a": ["b","c"] })
+      describe 'clear()', ->
+        it 'should clear using clear()', ->
+          assert.equal uri.query.clear().stringify(), "", "clear"
 
-      it 'should remove', ->
-        #example http://test.com/?a=b&a=b&a=c
-        uri.query({ d: null })
+      describe 'merge()', ->
+        it 'should merge', ->
+          assert.equal uri.query.merge({d: 9, e: 5 }).stringify(), "d=1&e=1&d=1&e=5&d=9", "merged"
+
+      describe 'append()', ->
+        it 'should append', ->
+          assert.equal uri.query.append({a: b }).stringify(), "d=1&e=1&d=1&a=b", "appended"
+
+        it 'should append, multi', ->
+          assert.equal uri.query.append({ "a": ["c","d"] }).stringify(), "d=1&e=1&d=1&a=b", "appended"
+
 
