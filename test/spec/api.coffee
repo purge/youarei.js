@@ -69,14 +69,6 @@ describe 'new YouAreI()', ->
         it 'should clear using clear()', ->
           assert.equal uri.query.clear().stringify(), ""
 
-      describe 'merge()', ->
-        it 'should merge', ->
-          assert.equal uri.query.merge({d: 9, e: 5 }).stringify(), "d=1&e=1&d=1&e=5&d=9"
-
-        it 'should remove', ->
-          assert.equal uri.query.set({ d: null }).stringify(), "e=1&e=5&d=9"
-
-
       describe 'append()', ->
         it 'should append', ->
           assert.equal uri.query.append({a: "b" }).stringify(), "d=1&e=1&d=1&a=b"
@@ -84,4 +76,12 @@ describe 'new YouAreI()', ->
         it 'should append, multi', ->
           assert.equal uri.query.append({ "a": ["c","d"] }).stringify(), "d=1&e=1&d=1&a=c&a=d"
 
+      describe 'merge()', ->
+        it 'should merge', ->
+          assert.equal uri.query.merge({d: 9, e: 5, f: 6 }).stringify(), "d=9&e=5&f=6"
 
+        it 'should remove', ->
+          assert.equal uri.query.merge({ d: null }).stringify(), "e=1"
+
+        it 'set multi', ->
+          assert.equal uri.query.merge({ d: [1,2,3] }).stringify(), "d=1&e=1&d=2&d=3"

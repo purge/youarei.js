@@ -3,6 +3,10 @@ var auth_re = /^([^\@]+)\@/;
 var port_re = /:(\d+)$/;
 var pl_re = /\+/g;
 var qp_re = /^([^=]+)(?:=(.*))?$/;
+var ports = {
+  80: "http",
+  443: "https"
+};
 
 //actually doesn't support URIs yet, only URLs
 function YouAreI(uri){
@@ -13,8 +17,8 @@ YouAreI.prototype = {
 
   parse: function(uri) {
     // From RFC 3986
-    var f = uri ? uri.match(uri_re) : [];
-    _this =  this.scheme(f[2]||"").authority(f[4]||"").path(f[5]||"")
+    var f = uri ? uri.match(uri_re) : [],
+        _this =  this.scheme(f[2]||"").authority(f[4]||"").path(f[5]||"")
                .fragment(f[9]||"");
     _this.query.set(f[7]||"");
     return _this;
@@ -34,7 +38,6 @@ YouAreI.prototype = {
 
     stringify: function() {
       //regenerate from parsed
-      console.log(this._query);
       var pairs = [],
           n = this._query[0],
           v = this._query[1];
@@ -130,18 +133,35 @@ YouAreI.prototype = {
 
     //find existing keys and update or append.
     merge: function(opt) {
-      var ex = this._query;
+      var p = this._query[0];
+      var q = this._query[1];
       for(key in opt) {
         //find existing
-        for(x_key in ex) {
+        var kset = false;
+
+        for(var i=0; i < p.length; i++) {
+          var x_key = p[i];
           if(key === x_key) {
-            if( Object.prototype.toString.call( opt[key] ) === '[object Array]' ) {
-              ex[key] = opt[key];
-            } else {
-              ex[key] = opt[key];
+
+            if(kset) {
+              p.splice(i,1);
+              q.splice(i,1);
+              continue;
             }
-            //remove future ones too
-            delete opt[key];
+
+            if( Object.prototype.toString.call( opt[key] ) === '[object Array]' ) {
+              //take one off here, rest handled in append.
+              q[i] = opt[key].shift();
+            } else if (opt[key] === undefined || opt[key] === null ) {
+              p.splice(i,1);
+              q.splice(i,1);
+              delete opt[key];
+            } else {
+              q[i] = opt[key];
+              delete opt[key];
+            }
+
+            kset = true;
           }
         }
       }
