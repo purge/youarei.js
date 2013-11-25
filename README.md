@@ -1,5 +1,11 @@
 youarei.js
 ==========
+
+A Javascript (UMD, node) module with sane query parameter handling. Under 1k gzipped.
+
+API
+===
+
 ```
 var url = new YouAreI("https://user:pass@www.example.com/a/b?z=1&y=2&x=3&z=2#boop");
 
