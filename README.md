@@ -1,7 +1,7 @@
 youarei.js
 ==========
 
-A Javascript (UMD, node) module with sane query parameter handling. Under 1k gzipped.
+A Javascript (UMD, node) module with sane query parameter handling. About 1k gzipped.
 
 API
 ===
