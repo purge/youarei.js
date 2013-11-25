@@ -17,6 +17,7 @@ url.host() === 'www.example.com'
 url.port() === 443
 url.path() === '/a/b'
 url.fragment() === "boop"
+url.stringify() === "https://user:pass@www.example.com/a/b?z=1&y=2&x=3&z=2#boop"
 ```
 
 Query Handling
@@ -60,5 +61,13 @@ Always merge with existing
 Clear querystring:
 
 `url.query_clear()`
+
+Set it as a raw value:
+
+`url.query_set("a=b&c=d")`
+
+Output as safe string:
+
+`url.query_stringify()`
 
 See tests/ for more details
