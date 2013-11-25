@@ -12,6 +12,7 @@
   var port_re = /:(\d+)$/;
   var pl_re = /\+/g;
   var qp_re = /^([^=]+)(?:=(.*))?$/;
+  var is_array = function(object) { return '[object Array]' === Object.prototype.toString.call(object); };
   //var ports = { 80: "http", 443: "https" };
   //actually doesn't support URIs yet, only URLs
 
@@ -195,7 +196,7 @@
     //split into constituent parts
     _query_toList: function(p,q, opt) {
       for(var key in opt) {
-        if( Object.prototype.toString.call( opt[key] ) === '[object Array]' ) {
+        if( is_array(opt[key]) ) {
           opt[key].forEach(function (val) {
             p.push(key);
             q.push(val);
@@ -232,7 +233,7 @@
               continue;
             }
 
-            if( Object.prototype.toString.call( opt[key] ) === '[object Array]' ) {
+            if( is_array( opt[key] ) ) {
               //take one off here, rest handled in append.
               q[i] = opt[key].shift();
             } else if (opt[key] === undefined || opt[key] === null ) {
