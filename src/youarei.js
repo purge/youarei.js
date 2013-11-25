@@ -10,7 +10,6 @@
   var uri_re = /^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
   var auth_re = /^([^\@]+)\@/;
   var port_re = /:(\d+)$/;
-  var pl_re = /\+/g;
   var qp_re = /^([^=]+)(?:=(.*))?$/;
   var is_array = function(object) { return '[object Array]' === Object.prototype.toString.call(object); };
   //var ports = { 80: "http", 443: "https" };
@@ -174,23 +173,20 @@
 
     _query_parse: function(raw) {
 
-      var keys = [], values = [],
+      var struct = [[],[]],
           pairs = raw.split(/&|;/);
 
       pairs.forEach(function(pair) {
         var n_pair, name, value;
         if(n_pair = pair.match(qp_re)) {
-          var tmp = {};
-          name = decodeURIComponent(n_pair[1].replace(pl_re, " "));
-          value = decodeURIComponent(n_pair[2].replace(pl_re, " "));
-          keys.push( name );
-          values.push( value );
-        } else {
-          return;
+          n_pair.shift();//remove first
+          n_pair.forEach(function(p,i) {
+            struct[i].push(decodeURIComponent(p.replace('+', ' ', 'g')));
+          });
         }
       });
 
-      return [keys, values];
+      return struct;
     },
 
     //split into constituent parts
