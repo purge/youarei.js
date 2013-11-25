@@ -1,0 +1,24 @@
+{
+  "name": "youarei",
+  "version": "0.9.0",
+  "homepage": "https://github.com/purge/youarei.js",
+  "authors": [
+    "Simon Elliott <simon@papercreatures.com>"
+  ],
+  "description": "Micro URI parser with sane querystring",
+  "main": "dist/youarei.js",
+  "keywords": [
+    "uri",
+    "url",
+    "querystring",
+    "query"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

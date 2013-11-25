@@ -6,9 +6,6 @@
   "directories": {
     "test": "test"
   },
-  "scripts": {
-    "test": "karma start"
-  },
   "keywords": [
     "uri",
     "url",
@@ -23,11 +20,9 @@
     "karma-phantomjs-launcher": "~0.1.0",
     "karma-coffee-preprocessor": "~0.1.0"
   },
-  "dependencies": {
-    "uglifyjs": "~2.3.6",
-    "browserify": "~2.35.4"
-  },
+  "dependencies": { },
   "scripts": {
-    "build-js": "browserify src/youarei.js | uglifyjs -mc > dist/youarei.js",
+    "test": "karma start",
+    "build-js": "umd YouAreI src/youarei.js | uglifyjs -mc > dist/youarei-min.js"
   }
 }
