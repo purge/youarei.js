@@ -26,53 +26,40 @@
       .fragment(f[9]||"").query_set(f[7]||"");
     },
 
-    fragment: function(fragment) {
-      if(fragment !== undefined) {
-        this._fragment = fragment;
+    gs: function(val,tar, fn) {
+      if(val !== undefined) {
+        this[tar] = val;
         return this;
       } else {
-        return this._fragment;
+        return fn ? fn(this[tar]) : this[tar];
       }
     },
-
-    userinfo: function(userinfo) {
-      if(userinfo !== undefined) {
-        this._userinfo = userinfo;
-        return this;
-      } else {
-        return encodeURI(this._userinfo);
-      }
+    fragment: function(f) {
+      return this.gs(f,'_fragment');
     },
 
-    path: function(path) {
-      if(path !== undefined) {
-        this._path = path;
-        return this;
-      } else {
-        return this._path;
-      }
+    userinfo: function(f) {
+      return this.gs(f,'_userinfo', function (r) { return encodeURI(r) } );
+    },
+
+    path: function(f) {
+      return this.gs(f,'_path');
+    },
+
+    scheme: function(f) {
+      return this.gs(f,'_scheme');
+    },
+
+    port: function (f) {
+      return this.gs(f,'_port');
+    },
+
+    host: function (f) {
+      return this.gs(f,'_host');
     },
 
     protocol: function () {
       return this.scheme.toLowerCase();
-    },
-
-    port: function (port) {
-      if(port !== undefined) {
-        this._port = port;
-        return this;
-      } else {
-        return this._port;
-      }
-    },
-
-    host: function (host) {
-      if(host !== undefined) {
-        this._host = host;
-        return this;
-      } else {
-        return this._host;
-      }
     },
 
     authority: function(authority) {
@@ -96,15 +83,6 @@
         authority += this.host();
         if (port = this.port()) { authority += ":" + port; }
         return authority;
-      }
-    },
-
-    scheme: function(scheme) {
-      if(scheme !== undefined) {
-        this._scheme = scheme;
-        return this;
-      } else {
-        return this._scheme;
       }
     },
 
