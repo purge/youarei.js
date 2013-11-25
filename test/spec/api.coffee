@@ -49,39 +49,40 @@ describe 'new YouAreI()', ->
 
     describe 'query', ->
       describe 'stringify()', ->
-        assert.equal uri.query.stringify(), "d=1&e=1&d=1"
+        assert.equal uri.query_stringify(), "d=1&e=1&d=1"
 
       describe 'get(), get_all()', ->
-        assert.deepEqual uri.query.get(), { d: ['1','1'], e: '1' }
-        assert.deepEqual uri.query.get_all(), { d: ['1','1'], e: ['1'] }
+        assert.deepEqual uri.query_get(), { d: ['1','1'], e: '1' }
+        assert.deepEqual uri.query_get_all(), { d: ['1','1'], e: ['1'] }
 
       describe 'set()', ->
-        it 'replaced using pair', ->
-          assert.equal uri.query.set("d", 10).stringify(), "d=10"
+        it 'merged using pair', ->
+          assert.equal uri.query_set("d", 10).query_stringify(), "d=10&e=1"
 
         it 'replaced using object', ->
-          assert.equal uri.query.set({d: 9, e: 10}).stringify(), "d=9&e=10"
+          assert.equal uri.query_set({d: 9, e: 10}).query_stringify(), "d=9&e=10"
 
         it 'should clear using set()', ->
-          assert.equal uri.query.set().stringify(), ""
+          assert.equal uri.query_set().query_stringify(), ""
 
       describe 'clear()', ->
         it 'should clear using clear()', ->
-          assert.equal uri.query.clear().stringify(), ""
+          assert.equal uri.query_clear().query_stringify(), ""
 
       describe 'append()', ->
         it 'should append', ->
-          assert.equal uri.query.append({a: "b" }).stringify(), "d=1&e=1&d=1&a=b"
+          assert.equal uri.query_push({a: "b" }).query_stringify(), "d=1&e=1&d=1&a=b"
 
         it 'should append, multi', ->
-          assert.equal uri.query.append({ "a": ["c","d"] }).stringify(), "d=1&e=1&d=1&a=c&a=d"
+          assert.equal uri.query_push({ "a": ["c","d"] }).query_stringify(), "d=1&e=1&d=1&a=c&a=d"
 
       describe 'merge()', ->
         it 'should merge', ->
-          assert.equal uri.query.merge({d: 9, e: 5, f: 6 }).stringify(), "d=9&e=5&f=6"
+          assert.equal uri.query_merge({d: 9, e: 5, f: 6 }).query_stringify(), "d=9&e=5&f=6"
 
         it 'should remove', ->
-          assert.equal uri.query.merge({ d: null }).stringify(), "e=1"
+          assert.equal uri.query_merge({ d: null }).query_stringify(), "e=1"
 
         it 'set multi', ->
-          assert.equal uri.query.merge({ d: [1,2,3] }).stringify(), "d=1&e=1&d=2&d=3"
+          assert.equal uri.query_merge({ d: [1,2,3] }).query_stringify(), "d=1&e=1&d=2&d=3"
+
