@@ -56,8 +56,10 @@ describe 'new YouAreI()', ->
         assert.equal uri.query_stringify(), "d=1&e=1&d=1"
 
       describe 'get(), get_all()', ->
-        assert.deepEqual uri.query_get(), { d: ['1','1'], e: '1' }
+        assert.deepEqual uri.query_get(), { d: '1', e: '1' }
         assert.deepEqual uri.query_get_all(), { d: ['1','1'], e: ['1'] }
+        assert.deepEqual uri.query_get('d'), '1'
+        assert.deepEqual uri.query_get_all('d'), ['1', '1']
 
       describe 'set()', ->
         it 'merged using pair', ->
@@ -73,7 +75,7 @@ describe 'new YouAreI()', ->
         it 'should clear using clear()', ->
           assert.equal uri.query_clear().query_stringify(), ""
 
-      describe 'append()', ->
+      describe '(ush()', ->
         it 'should append', ->
           assert.equal uri.query_push({a: "b" }).query_stringify(), "d=1&e=1&d=1&a=b"
 

@@ -122,39 +122,47 @@ YouAreI.prototype = {
     return pairs.join('&');
   },
 
-  query_get: function() {
+  query_get: function(limit) {
 
     var dict = {};
     var opts = this._query;
+
     for(var i=0; i < opts[0].length; i++) {
       var k = opts[0][i],
-      v = opts[1][i];
+          v = opts[1][i];
+      if(limit && k !== limit) { continue; }
+
       if(dict[k]) {
-        if(Array.isArray(dict[k])) {
-          dict[k].push(v);
-        } else {
-          dict[k] = [dict[k],v];
-        }
+        continue;
+        //don't list extras
+        //if(Array.isArray(dict[k])) {
+          //dict[k].push(v);
+        //} else {
+          //dict[k] = [dict[k],v];
+        //}
       } else {
         dict[k] = v;
       }
+
     }
-    return dict;
+    return limit ? dict[limit] : dict;
   },
 
-  query_get_all: function() {
+  query_get_all: function(limit) {
     var dict = {};
     var opts = this._query;
     for(var i=0; i < opts[0].length; i++) {
       var k = opts[0][i],
-      v = opts[1][i];
+          v = opts[1][i];
+      if(limit && k !== limit) { continue; }
+
       if(dict[k]) {
         dict[k].push(v);
       } else {
         dict[k] = [v];
       }
     }
-    return dict;
+    return limit ? dict[limit] : dict;
   },
 
   _query_parse: function(raw) {
@@ -267,4 +275,6 @@ YouAreI.prototype = {
     return this;
   }
 };
-module.exports = YouAreI;
+if(window.module) {
+  module.exports = YouAreI;
+}
