@@ -26,7 +26,6 @@ YouAreI.prototype = {
     }
   },
 
-
   userinfo: function(userinfo) {
     if(userinfo !== undefined) {
       this._userinfo = userinfo;
@@ -101,8 +100,8 @@ YouAreI.prototype = {
   },
 
   stringify: function() {
-    var q = this.query_stringify();
-    var f = this.fragment();
+    var q = this.query_stringify(),
+        f = this.fragment();
     return this.scheme() + '://' +  this.authority() + this.path() + (q ? '?' + q : '') +( f ? '#' + f : '');
 
   },
@@ -110,8 +109,8 @@ YouAreI.prototype = {
   query_stringify: function() {
     //regenerate from parsed
     var pairs = [],
-    n = this._query[0],
-    v = this._query[1];
+        n = this._query[0],
+        v = this._query[1];
 
     for(var i=0; i < n.length; i++) {
       pairs.push(encodeURIComponent(n[i]) + '=' + encodeURIComponent(v[i]));
@@ -122,8 +121,8 @@ YouAreI.prototype = {
 
   query_get: function(limit) {
 
-    var dict = {};
-    var opts = this._query;
+    var dict = {},
+        opts = this._query;
 
     for(var i=0; i < opts[0].length; i++) {
       var k = opts[0][i],
@@ -147,8 +146,8 @@ YouAreI.prototype = {
   },
 
   query_get_all: function(limit) {
-    var dict = {};
-    var opts = this._query;
+    var dict = {},
+        opts = this._query;
     for(var i=0; i < opts[0].length; i++) {
       var k = opts[0][i],
           v = opts[1][i];
@@ -165,8 +164,8 @@ YouAreI.prototype = {
 
   _query_parse: function(raw) {
 
-    var keys = [], values = [];
-    var pairs = raw.split(/&|;/);
+    var keys = [], values = [],
+        pairs = raw.split(/&|;/);
 
     pairs.forEach(function(pair) {
       var n_pair, name, value;
@@ -208,8 +207,8 @@ YouAreI.prototype = {
 
   //find existing keys and update or append.
   query_merge: function(opt) {
-    var p = this._query[0];
-    var q = this._query[1];
+    var p = this._query[0],
+        q = this._query[1];
     for(var key in opt) {
       //find existing
       var kset = false;
@@ -262,7 +261,6 @@ YouAreI.prototype = {
       }
     } else if(args.length === 0) {
       this.query_clear();
-
     } else {
       //probably a list, set key, val
       var obj = {};
