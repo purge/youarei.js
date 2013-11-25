@@ -2,7 +2,8 @@
   "name": "youarei.js",
   "version": "0.0.0",
   "description": "URI specialist",
-  "main": "youarei.js",
+  "main": "src/youarei.js",
+  "browser": "dist/youarei-min.js",
   "directories": {
     "test": "test"
   },
@@ -20,9 +21,11 @@
     "karma-phantomjs-launcher": "~0.1.0",
     "karma-coffee-preprocessor": "~0.1.0"
   },
-  "dependencies": { },
+  "dependencies": {
+    "deglobalify": "~0.2.0"
+  },
   "scripts": {
     "test": "karma start",
-    "build-js": "umd YouAreI src/youarei.js | uglifyjs -mc > dist/youarei-min.js"
+    "build-js": "browserify -s YouAreI src/youarei.js | uglifyjs -mc > dist/youarei-min.js"
   }
 }

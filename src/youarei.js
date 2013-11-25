@@ -4,8 +4,8 @@ var port_re = /:(\d+)$/;
 var pl_re = /\+/g;
 var qp_re = /^([^=]+)(?:=(.*))?$/;
 //var ports = { 80: "http", 443: "https" };
-
 //actually doesn't support URIs yet, only URLs
+
 function YouAreI(uri){ return this.parse(uri); }
 
 YouAreI.prototype = {
@@ -267,3 +267,4 @@ YouAreI.prototype = {
     return this;
   }
 };
+module.exports = YouAreI;

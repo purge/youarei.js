@@ -9,43 +9,47 @@ describe 'new YouAreI()', ->
     uri = new YouAreI "www.example.com"
     assert.ok uri
 
-  it 'Should accept empty URI', ->
+  xit 'Should accept empty URI', ->
     uri = new YouAreI()
     assert.ok uri
+    assert.equal uri.stringify(), "www.example.com"
 
   xit 'Throw exception on malformed URIs', ->
 
-  xit 'Should be chainable', ->
-    #TODO: decide whether query should return YouAreI object
-    uri = new YouAreI(ex_uri).query.set({a: "b"})
+  it 'Should be chainable', ->
+    uri = new YouAreI(ex_uri).query_set({a: "b"})
     assert.instanceOf uri, YouAreI, "URI"
 
   describe 'methods', ->
+
+    #removing this causes beforeEach not to be called?!
     uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
 
     beforeEach ->
       uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
 
-    describe 'stringify()', ->
-      assert.equal uri.stringify(), "http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment"
+    describe 'URI parts', ->
 
-    describe 'scheme()', ->
-      assert.equal uri.scheme(), "http"
+      describe 'stringify()', ->
+        assert.equal uri.stringify(), "http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment"
 
-    describe 'userinfo()', ->
-      assert.equal uri.userinfo(), "user:pass"
+      describe 'scheme()', ->
+        assert.equal uri.scheme(), "http"
 
-    describe 'host()', ->
-      assert.equal uri.host(), "www.example.com"
+      describe 'userinfo()', ->
+        assert.equal uri.userinfo(), "user:pass"
 
-    describe 'port()', ->
-      assert.equal uri.port(), 3000
+      describe 'host()', ->
+        assert.equal uri.host(), "www.example.com"
 
-    describe 'path()', ->
-      assert.equal uri.path(), "/a/b/c"
+      describe 'port()', ->
+        assert.equal uri.port(), 3000
 
-    describe 'fragment()', ->
-      assert.equal uri.fragment(), "fragment"
+      describe 'path()', ->
+        assert.equal uri.path(), "/a/b/c"
+
+      describe 'fragment()', ->
+        assert.equal uri.fragment(), "fragment"
 
     describe 'query', ->
       describe 'stringify()', ->
