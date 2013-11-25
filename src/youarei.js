@@ -12,11 +12,9 @@ YouAreI.prototype = {
 
   parse: function(uri) {
     // From RFC 3986
-    var f = uri ? uri.match(uri_re) : [],
-    _this =  this.scheme(f[2]||"").authority(f[4]||"").path(f[5]||"")
-    .fragment(f[9]||"");
-    _this.query_set(f[7]||"");
-    return _this;
+    var f = uri ? uri.match(uri_re) : [];
+    return this.scheme(f[2]||"").authority(f[4]||"").path(f[5]||"")
+    .fragment(f[9]||"").query_set(f[7]||"");
   },
 
   fragment: function(fragment) {
