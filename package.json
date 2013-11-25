@@ -26,6 +26,6 @@
   },
   "scripts": {
     "test": "karma start",
-    "build-js": "browserify -s YouAreI src/youarei.js | uglifyjs -mc > dist/youarei-min.js"
+    "build-js": "uglifyjs src/youarei.js > dist/youarei-min.js"
   }
 }
