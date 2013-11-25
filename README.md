@@ -7,6 +7,7 @@ Installing
 ==========
 
 `npm install youarei`
+
 `bower install youarei`
 
 API
