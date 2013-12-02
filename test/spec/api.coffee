@@ -46,7 +46,7 @@ describe 'new YouAreI()', ->
         assert.equal uri.port(), 3000
 
       describe 'path()', ->
-        assert.equal uri.path(), "/a/b/c"
+        assert.equal uri.path_stringify(), "/a/b/c"
 
       describe 'fragment()', ->
         assert.equal uri.fragment(), "fragment"
@@ -91,6 +91,20 @@ describe 'new YouAreI()', ->
 
         it 'set multi', ->
           assert.equal uri.query_merge({ d: [1,2,3] }).query_stringify(), "d=1&e=1&d=2&d=3"
+
+  describe 'path', ->
+    describe 'path_parts()', ->
+      uri = new YouAreI "/d/c/b?moo=1"
+      assert.deepEqual uri.path_parts(), ['d', 'c', 'b']
+
+    describe 'path_to_dir() not rooted', ->
+      uri = new YouAreI "/d/c/b?moo=1"
+      assert.equal uri.path_to_dir(),  "/d/c/"
+
+    describe 'path_to_dir()', ->
+      uri = new YouAreI "/d/c/b/?moo=1"
+      assert.equal uri.path_to_dir(),  "/d/c/b/"
+
 
   describe 'partial urls', ->
     describe 'just path', ->

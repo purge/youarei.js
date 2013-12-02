@@ -23,7 +23,7 @@
     parse: function(uri) {
       // From RFC 3986
       var f = uri ? uri.match(uri_re) : [];
-      return this.scheme(f[2]||"").authority(f[4]||"").path(f[5]||"")
+      return this.scheme(f[2]||"").authority(f[4]||"").path_set(f[5]||"")
       .fragment(f[9]||"").query_set(f[7]||"");
     },
 
@@ -49,12 +49,55 @@
 
     userinfo: function(f) {
       return this.gs(f,'_userinfo', function (r) {
-        return r === undefined ? r : encodeURI(r)
+        return r === undefined ? r : encodeURI(r);
       } );
     },
 
-    path: function(f) {
-      return this.gs(f,'_path');
+    path_set: function(f) {
+      this._path_parse(f);
+      return this;
+    },
+
+    _path_parse: function(path) {
+      path = decodeURIComponent(path||"");
+      var spl = path.split('/');
+
+      //match leading / trailing slashes
+      if(path.match(/^\//)) {
+        this._path_leading_slash = true;
+        spl.shift();
+      }
+      if(path.match(/\/$/)) {
+        this._path_trailing_slash = true;
+        spl.pop();
+      }
+
+      this._path = spl;
+      return spl;
+    },
+
+    path_stringify: function(opt_path) {
+      path = (opt_path || this._path).join("/");
+      if (this._path_leading_slash) path = '/' + path;
+      if (this._path_trailing_slash) path = path + '/';
+      return path;
+    },
+
+    path_to_dir: function() {
+      var path = this._path;
+
+      if(!this._path_trailing_slash) {
+        path.pop();
+        //add a trailing slash.
+        path.push("");
+      }
+
+      return this.path_stringify(path);
+    },
+
+    //temporary
+    path_parts: function() {
+      return this._path;
     },
 
     scheme: function(f) {
@@ -103,7 +146,7 @@
       var q = this.query_stringify(),
           f = this.fragment(),
           s = this.scheme();
-      return (s ? s + '://' : "") + this.authority() + this.path() + (q ? '?' + q : '') +( f ? '#' + f : '');
+      return (s ? s + '://' : "") + this.authority() + this.path_stringify() + (q ? '?' + q : '') +( f ? '#' + f : '');
 
     },
 
