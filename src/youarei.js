@@ -39,7 +39,9 @@
     },
 
     userinfo: function(f) {
-      return this.gs(f,'_userinfo', function (r) { return encodeURI(r) } );
+      return this.gs(f,'_userinfo', function (r) {
+        return r === undefined ? r : encodeURI(r)
+      } );
     },
 
     path: function(f) {
@@ -79,7 +81,9 @@
         return this;
       } else {
         authority = "";
-        if (userinfo = this.userinfo()) { authority = userinfo + "@"; }
+        if (userinfo = this.userinfo()) {
+          authority = userinfo + "@";
+        }
         authority += this.host();
         if (port = this.port()) { authority += ":" + port; }
         return authority;
@@ -88,8 +92,9 @@
 
     stringify: function() {
       var q = this.query_stringify(),
-          f = this.fragment();
-      return this.scheme() + '://' +  this.authority() + this.path() + (q ? '?' + q : '') +( f ? '#' + f : '');
+          f = this.fragment(),
+          s = this.scheme();
+      return (s ? s + '://' : "") +  this.authority() + this.path() + (q ? '?' + q : '') +( f ? '#' + f : '');
 
     },
 

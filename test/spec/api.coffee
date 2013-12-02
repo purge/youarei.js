@@ -92,3 +92,10 @@ describe 'new YouAreI()', ->
         it 'set multi', ->
           assert.equal uri.query_merge({ d: [1,2,3] }).query_stringify(), "d=1&e=1&d=2&d=3"
 
+  describe 'partial urls', ->
+    describe 'just path', ->
+      uri = new YouAreI "/d/c/b?moo=1"
+
+      describe 'stringify()', ->
+        assert.equal uri.stringify(), "/d/c/b?moo=1"
+
