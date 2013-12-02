@@ -11,7 +11,8 @@
   var auth_re = /^([^\@]+)\@/;
   var port_re = /:(\d+)$/;
   var qp_re = /^([^=]+)(?:=(.*))?$/;
-  var is_array = function(object) { return '[object Array]' === Object.prototype.toString.call(object); };
+  var is_array = function(object) {
+    return '[object Array]' === Object.prototype.toString.call(object); };
   //var ports = { 80: "http", 443: "https" };
   //actually doesn't support URIs yet, only URLs
 
@@ -24,6 +25,14 @@
       var f = uri ? uri.match(uri_re) : [];
       return this.scheme(f[2]||"").authority(f[4]||"").path(f[5]||"")
       .fragment(f[9]||"").query_set(f[7]||"");
+    },
+
+    clone: function() {
+      var copy = this.constructor();
+      for (var attr in this) {
+        copy[attr] = this[attr];
+      }
+      return copy;
     },
 
     gs: function(val,tar, fn) {
@@ -94,7 +103,7 @@
       var q = this.query_stringify(),
           f = this.fragment(),
           s = this.scheme();
-      return (s ? s + '://' : "") +  this.authority() + this.path() + (q ? '?' + q : '') +( f ? '#' + f : '');
+      return (s ? s + '://' : "") + this.authority() + this.path() + (q ? '?' + q : '') +( f ? '#' + f : '');
 
     },
 

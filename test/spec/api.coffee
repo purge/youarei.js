@@ -99,3 +99,11 @@ describe 'new YouAreI()', ->
       describe 'stringify()', ->
         assert.equal uri.stringify(), "/d/c/b?moo=1"
 
+  describe 'clone()', ->
+    uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
+    uri2 = uri.clone()
+    uri.parse("https://x:y@www.example2.com:5000/test?x=y#fragment2")
+    it "doesn't bleed clone", ->
+      assert.equal uri2.stringify(), "http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment"
+      assert.equal uri.stringify(), "https://x:y@www.example2.com:5000/test?x=y#fragment2"
+
