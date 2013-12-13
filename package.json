@@ -1,6 +1,6 @@
 {
   "name": "youarei.js",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "URI specialist",
   "main": "src/youarei.js",
   "browser": "dist/youarei-min.js",
