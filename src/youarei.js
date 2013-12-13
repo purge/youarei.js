@@ -43,6 +43,7 @@
         return fn ? fn(this[tar]) : this[tar];
       }
     },
+
     fragment: function(f) {
       return this.gs(f,'_fragment');
     },
@@ -55,6 +56,12 @@
 
     path_set: function(f) {
       this._path_parse(f);
+      return this;
+    },
+
+    path_basename_set: function(name) {
+      this._path_trailing_slash = false;
+      this._path.push(name);
       return this;
     },
 

@@ -75,7 +75,7 @@ describe 'new YouAreI()', ->
         it 'should clear using clear()', ->
           assert.equal uri.query_clear().query_stringify(), ""
 
-      describe '(ush()', ->
+      describe 'push()', ->
         it 'should append', ->
           assert.equal uri.query_push({a: "b" }).query_stringify(), "d=1&e=1&d=1&a=b"
 
@@ -104,6 +104,11 @@ describe 'new YouAreI()', ->
     describe 'path_to_dir()', ->
       uri = new YouAreI "/d/c/b/?moo=1"
       assert.equal uri.path_to_dir(),  "/d/c/b/"
+
+    describe 'path_basename_set()', ->
+      uri = new YouAreI "/d/c/b/?moo=1"
+      uri.path_basename_set("test.html")
+      assert.equal uri.path_stringify(),  "/d/c/b/test.html"
 
 
   describe 'partial urls', ->
