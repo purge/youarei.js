@@ -114,6 +114,15 @@ describe 'new YouAreI()', ->
       uri.path_basename_set("test.html")
       assert.equal uri.path_stringify(),  "/d/c/test.html"
 
+    xdescribe 'path_extension_set()', ->
+      uri = new YouAreI "/d/c/b"
+      uri.path_extension_set("html")
+      assert.equal uri.path_stringify(),  "/d/c/b.html"
+
+      uri = new YouAreI "/d/c/"
+      #throw error?
+      uri.path_extension_set("html")
+      assert.equal uri.path_stringify(),  "/d/c/b.html"
 
   describe 'partial urls', ->
     describe 'just path', ->
