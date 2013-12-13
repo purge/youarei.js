@@ -60,8 +60,12 @@
     },
 
     path_basename_set: function(name) {
-      this._path_trailing_slash = false;
-      this._path.push(name);
+      if(this._path_trailing_slash) {
+        this._path.push(name);
+        this._path_trailing_slash = false;
+      } else {
+        this._path[this._path.length-1] = name;
+      }
       return this;
     },
 

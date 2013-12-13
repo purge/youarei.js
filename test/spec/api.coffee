@@ -110,6 +110,10 @@ describe 'new YouAreI()', ->
       uri.path_basename_set("test.html")
       assert.equal uri.path_stringify(),  "/d/c/b/test.html"
 
+      uri = new YouAreI "/d/c/b"
+      uri.path_basename_set("test.html")
+      assert.equal uri.path_stringify(),  "/d/c/test.html"
+
 
   describe 'partial urls', ->
     describe 'just path', ->
