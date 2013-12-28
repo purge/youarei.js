@@ -14,6 +14,7 @@ API (generated from tests)
 ===
 ```
 
+Start:
   new YouAreI()
     ✓ Should accept regular URI (http://www.example.com)
     ✓ Should accept schemeless URI ( www.example.com )
@@ -21,7 +22,7 @@ API (generated from tests)
     ✗ Throw exception on malformed URIs (skipped)
     ✓ Should be chainable
     methods
-      URI parts for [object Object]
+      URI parts for http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment
         stringify()
           ✓ should stringify back to source representation
         scheme()
@@ -73,7 +74,7 @@ API (generated from tests)
     clone()
       ✓ should clone the url
 
-Finished in 0.008 secs
+Finished in 0.003 secs
 
 SUMMARY:
 ✓ 87 tests completed
