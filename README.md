@@ -10,71 +10,73 @@ Installing
 
 `bower install youarei`
 
-API
+API (generated from tests)
 ===
-
-The usual suspects
-
-```
-var url = new YouAreI("https://user:pass@www.example.com/a/b?z=1&y=2&x=3&z=2#boop");
-
-url.scheme() === "https"
-uri.userinfo() === "user:pass"
-url.host() === 'www.example.com'
-url.port() === 443
-url.path() === '/a/b'
-url.fragment() === "boop"
-url.stringify() === "https://user:pass@www.example.com/a/b?z=1&y=2&x=3&z=2#boop"
 ```
 
-Query Handling
-==============
+  new YouAreI()
+    ✓ Should accept regular URI (http://www.example.com)
+    ✓ Should accept schemeless URI ( www.example.com )
+    ✗ Should accept empty URI (skipped)
+    ✗ Throw exception on malformed URIs (skipped)
+    ✓ Should be chainable
+    methods
+      URI parts for [object Object]
+        stringify()
+          ✓ should stringify back to source representation
+        scheme()
+          ✓ should return scheme ( http )
+        userinfo()
+          ✓ should return userinfo ( user:pass )
+        host()
+          ✓ should return host ( www.example.com )
+        port()
+          ✓ should return port ( 3000 )
+        path()
+          ✓ should return path ( /a/b/c )
+        fragment()
+          ✓ should return fragment ( fragment )
+      query
+        query_stringify()
+          ✓ should stringify back to source representation
+        query_get()
+          ✓ should return the query dictionary containing the first value of multis
+        query_get_all()
+          ✓ should return query dictionary always using an array regardless, {d: [1,1], e: [1]}
+        query_set()
+          ✓ should merge the new value with the existing query
+          ✓ should replace the entire query with the new value
+          ✓ no parameters should reset the query to blank
+        query_clear()
+          ✓ should clear the query
+        query_push()
+          ✓ should append the new value adding new if it doesn't exist
+          ✓ should append the new value to an existing key if it exists
+        query_merge()
+          ✓ should merge with existing values
+          ✓ should remove key:val if val is set to null
+          ✓ should merge multiple values too, preserving order
+    path
+      path_parts()
+        ✓ should return array of path parts
+      path_to_dir()
+        ✓ should return the path without script
+        ✓ should return the path without script (with trailing slash)
+      path_basename_set()
+        ✓ should set the basename to value (i.e test.html) after trailing slash
+        ✓ should set the basename to value (i.e test.html)
+      path_extension_set()
+        ✗ should set the extension on basename (skipped)
+        ✗ should throw error when not possible (skipped)
+    partial urls
+      ✓ handles just path
+    clone()
+      ✓ should clone the url
 
-query_get() will only ever return the *first* provided if multiple same named parameters are set
+Finished in 0.008 secs
+
+SUMMARY:
+✓ 87 tests completed
+- 12 tests skipped
 
 ```
-url.query_get() === { z: 1, y: 2, x: 3  }
-url.query_get('z') === 1
-```
-
-query_get_all() will *always* return a list as the value for a key, regardless of whether the parameter is provided multiple times
-
-```
-url.query_get_all() === { z: [1,2], y: [2], x: [3]  }
-url.query_get_all('z') === ['1', '2']
-```
-
-query_set() will DWIM
-
-replace entire query string:
-
-`url.query_set({'z', 1})`
-
-merge with existing query string (replace if exists, otherwise append)
-
-`url.query_set('z', 1)`
-
-
-Helpers to cut down on boilerplate code
-
-Always append to existing
-
-`url.query_push({z: [3, 4]})`
-
-Always merge with existing
-
-`url.query_merge({z: [3, 4]})`
-
-Clear querystring:
-
-`url.query_clear()`
-
-Set it as a raw value:
-
-`url.query_set("a=b&c=d")`
-
-Output as safe string:
-
-`url.query_stringify()`
-
-See tests/ for more details
