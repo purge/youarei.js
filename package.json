@@ -1,9 +1,9 @@
 {
   "name": "youarei.js",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "URI specialist",
   "main": "src/youarei.js",
-  "browser": "dist/youarei-min.js",
+  "browser": "dist/youarei.min.js",
   "directories": {
     "test": "test"
   },
@@ -24,6 +24,6 @@
   "dependencies": { },
   "scripts": {
     "test": "karma start",
-    "build-js": "uglifyjs src/youarei.js > dist/youarei-min.js"
+    "build-js": "cp src/youarei.js dist/youarei.js && uglifyjs src/youarei.js > dist/youarei.min.js"
   }
 }
