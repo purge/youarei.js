@@ -11,6 +11,12 @@
   var auth_re = /^([^\@]+)\@/;
   var port_re = /:(\d+)$/;
   var qp_re = /^([^=]+)(?:=(.*))?$/;
+  function toCamel(str) {
+    return str.replace(/(\_[a-z])/g, function($1){
+      return $1.toUpperCase().replace('_','');
+    });
+  }
+
   var is_array = function(object) {
     return '[object Array]' === Object.prototype.toString.call(object); };
   //var ports = { 80: "http", 443: "https" };
@@ -48,7 +54,7 @@
       return this.gs(f,'_fragment');
     },
 
-    userinfo: function(f) {
+    user_info: function(f) {
       return this.gs(f,'_userinfo', function (r) {
         return r === undefined ? r : encodeURI(r);
       } );
@@ -134,7 +140,7 @@
         this._authority = authority;
         if(auth = authority.match(auth_re)) {
           authority = authority.replace(auth_re, '');
-          this.userinfo(auth[1]);
+          this.user_info(auth[1]);
         }
         //Port
         if(port = authority.match(port_re)) {
@@ -145,7 +151,7 @@
         return this;
       } else {
         authority = "";
-        if (userinfo = this.userinfo()) {
+        if (userinfo = this.user_info()) {
           authority = userinfo + "@";
         }
         authority += this.host();
@@ -324,6 +330,14 @@
       return this;
     }
   };
+
+  //map to camelcase.
+  for(var name in YouAreI.prototype) {
+    if(!name.match(/^_/)) {
+      var cName = toCamel(name);
+      YouAreI.prototype[cName] = YouAreI.prototype[name]
+    }
+  }
   return YouAreI;
 }));
 

@@ -38,9 +38,10 @@ describe 'new YouAreI()', ->
         it 'should return scheme ( http )', ->
           assert.equal uri.scheme(), "http"
 
-      describe 'userinfo()', ->
+      describe 'user_info()', ->
         it 'should return userinfo ( user:pass )', ->
-          assert.equal uri.userinfo(), "user:pass"
+          assert.equal uri.user_info(), "user:pass"
+          assert.equal uri.userInfo(), "user:pass"
 
       describe 'host()', ->
         it 'should return host ( www.example.com )', ->
@@ -53,6 +54,7 @@ describe 'new YouAreI()', ->
       describe 'path_stringify()', ->
         it 'should return path ( /a/b/c )', ->
           assert.equal uri.path_stringify(), "/a/b/c"
+          assert.equal uri.pathStringify(), "/a/b/c"
 
       describe 'fragment()', ->
         it 'should return fragment ( fragment )', ->
@@ -62,6 +64,7 @@ describe 'new YouAreI()', ->
       describe 'query_stringify()', ->
         it 'should stringify back to source representation', ->
           assert.equal uri.query_stringify(), "d=1&e=1&d=1"
+          assert.equal uri.queryStringify(), "d=1&e=1&d=1"
 
       describe 'query_get()', ->
         it 'should return the query dictionary containing the first value of multis', ->
