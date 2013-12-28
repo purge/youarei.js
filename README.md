@@ -12,6 +12,9 @@ Installing
 
 API (generated from tests)
 ===
+
+Note: All methods are aliased to their camelCase alternative.
+
 ```
 
 Start:
@@ -27,8 +30,8 @@ Start:
           ✓ should stringify back to source representation
         scheme()
           ✓ should return scheme ( http )
-        userinfo()
-          ✓ should return userinfo ( user:pass )
+        user_info()
+          ✓ should return user info ( user:pass )
         host()
           ✓ should return host ( www.example.com )
         port()
