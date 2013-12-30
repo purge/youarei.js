@@ -26,23 +26,23 @@ Start:
     ✓ Should be chainable
     methods
       URI parts for http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment
-        stringify()
-          ✓ should stringify back to source representation
+        toString()
+          ✓ should toString back to source representation
         scheme()
           ✓ should return scheme ( http )
         user_info()
-          ✓ should return user info ( user:pass )
+          ✓ should return userinfo ( user:pass )
         host()
           ✓ should return host ( www.example.com )
         port()
           ✓ should return port ( 3000 )
-        path()
+        path_to_string()
           ✓ should return path ( /a/b/c )
         fragment()
           ✓ should return fragment ( fragment )
       query
-        query_stringify()
-          ✓ should stringify back to source representation
+        query_to_string()
+          ✓ should to_string back to source representation
         query_get()
           ✓ should return the query dictionary containing the first value of multis
         query_get_all()
@@ -62,6 +62,7 @@ Start:
           ✓ should merge multiple values too, preserving order
     path
       path_parts()
+        ✓ should set path
         ✓ should return array of path parts
       path_to_dir()
         ✓ should return the path without script
@@ -77,10 +78,9 @@ Start:
     clone()
       ✓ should clone the url
 
-Finished in 0.003 secs
+Finished in 0.005 secs
 
 SUMMARY:
-✓ 87 tests completed
-- 12 tests skipped
-
+✓ 30 tests completed
+- 4 tests skipped
 ```
