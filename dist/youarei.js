@@ -93,7 +93,7 @@
       return spl;
     },
 
-    path_stringify: function(opt_path) {
+    path_to_string: function(opt_path) {
       path = (opt_path || this._path).join("/");
       if (this._path_leading_slash) path = '/' + path;
       if (this._path_trailing_slash) path = path + '/';
@@ -109,7 +109,7 @@
         path.push("");
       }
 
-      return this.path_stringify(path);
+      return this.path_to_string(path);
     },
 
     //temporary
@@ -160,15 +160,15 @@
       }
     },
 
-    stringify: function() {
-      var q = this.query_stringify(),
+    to_string: function() {
+      var q = this.query_to_string(),
           f = this.fragment(),
           s = this.scheme();
-      return (s ? s + '://' : "") + this.authority() + this.path_stringify() + (q ? '?' + q : '') +( f ? '#' + f : '');
+      return (s ? s + '://' : "") + this.authority() + this.path_to_string() + (q ? '?' + q : '') +( f ? '#' + f : '');
 
     },
 
-    query_stringify: function() {
+    query_to_string: function() {
       //regenerate from parsed
       var pairs = [],
           n = this._query[0],
