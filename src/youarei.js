@@ -79,6 +79,9 @@
       path = decodeURIComponent(path||"");
       var spl = path.split('/');
 
+      this._path_leading_slash = false;
+      this._path_trailing_slash = false;
+
       //match leading / trailing slashes
       if(path.match(/^\//)) {
         this._path_leading_slash = true;
