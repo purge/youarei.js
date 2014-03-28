@@ -233,11 +233,12 @@
         var struct = [[],[]],
         pairs = raw.split(/&|;/);
 
-        for (var pairn in pairs) {
-          var n_pair, name, value,
-              pair = pairs[pairn];
+        for (var j = 0; j < pairs.length; j++) {
+          var name, value,
+              pair = pairs[j],
+              n_pair = pair.match(qp_re);
 
-          if(n_pair = pair.match(qp_re)) {
+          if(n_pair) {
             n_pair.shift();//remove first
             for (var i = 0; i < n_pair.length; i++) {
               var p = n_pair[i];
