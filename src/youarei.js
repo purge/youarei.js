@@ -83,12 +83,13 @@
         this._path_leading_slash = false;
         this._path_trailing_slash = false;
 
-        //match leading / trailing slashes
+        //match leading / trailing slashes, special case if we are root
         if(path.match(/^\//)) {
           this._path_leading_slash = true;
           spl.shift();
         }
-        if(path.match(/\/$/)) {
+
+        if(spl.length > 1 && path.match(/\/$/)) {
           this._path_trailing_slash = true;
           spl.pop();
         }

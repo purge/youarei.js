@@ -157,6 +157,12 @@ describe 'new YouAreI()', ->
       uri = new YouAreI "/d/c/b?moo=1"
       assert.equal uri.toString(), "/d/c/b?moo=1"
 
+  describe 'edge cases', ->
+
+    it 'handles root path with only one slash', ->
+      uri = new YouAreI "http://www.example.com/"
+      assert.equal uri.toString(), "http://www.example.com/"
+
   describe 'clone()', ->
     it "should clone the url", ->
       uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
