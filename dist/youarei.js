@@ -240,10 +240,12 @@
               n_pair = pair.match(qp_re);
 
           if(n_pair) {
-            n_pair.shift();//remove first
-            for (var i = 0; i < n_pair.length; i++) {
-              var p = n_pair[i];
-              struct[i].push(decodeURIComponent(p.replace('+', ' ', 'g')));
+            if(typeof n_pair[n_pair.length -1] !== 'undefined') {
+              n_pair.shift();//remove first
+              for (var i = 0; i < n_pair.length; i++) {
+                var p = n_pair[i];
+                struct[i].push(decodeURIComponent(p.replace('+', ' ', 'g')));
+              }
             }
           }
 
