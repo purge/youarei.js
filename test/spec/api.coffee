@@ -23,10 +23,10 @@ describe 'new YouAreI()', ->
   describe 'methods', ->
 
     #removing this causes beforeEach not to be called?!
-    uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
+    uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1&gg#fragment")
 
     beforeEach ->
-      uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment")
+      uri = new YouAreI("http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1&gg#fragment")
 
     describe "URI parts for #{uri.toString()}", ->
 
