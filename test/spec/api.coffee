@@ -1,4 +1,5 @@
 describe 'new YouAreI()', ->
+  Array.prototype.stupid = -> false
   ex_uri = "http://www.example.com"
 
   it "Should accept regular URI (#{ex_uri})", ->
