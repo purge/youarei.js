@@ -258,8 +258,8 @@
       _query_toList: function(p,q, opt) {
         for(var key in opt) {
           if( is_array(opt[key]) ) {
-            for (var valn in opt[key]) {
-              var val = opt[key][valn];
+            for (var i = 0; i < opt[key].length; i++) {
+              var val = opt[key][i];
               p.push(key);
               q.push(val);
             };
