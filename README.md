@@ -10,6 +10,111 @@ Installing
 
 `bower install youarei`
 
+Example Usage
+===
+
+```javascript
+$ node
+> YouAreI = require('YouAreI')
+
+// initializing the object
+> var uri = new YouAreI('http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment');
+
+// FORMATTING URI COMPONENTS
+> uri.query_get()
+{ d: 'dad', e: '1', f: '12.3' }
+
+> uri.query_get_all()
+{ d: [ 'dad' ],
+  e: [ '1' ],
+  f: [ '12.3' ]
+
+> uri.query_to_string()
+'d=dad&e=1&f=12.3'
+
+> uri.to_string()
+'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment'
+
+// RETRIEVING URI COMPONENTS
+> uri.scheme()
+'http'
+
+> uri.user_info()
+'user:pass'
+
+> uri.host()
+'www.example.com'
+
+> uri.port()
+'3000'
+
+> uri.path_to_string()
+'/a/b/'
+
+> uri.fragment()
+'fragment'
+
+> uri.path_parts()
+[ 'a', 'b', 'c' ]
+
+> uri.path_to_dir()
+'/a/b/'
+
+// MUTATING THE URI
+// all examples begin fresh with
+> var uri = new YouAreI('http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment')
+
+// Replace the query parameters
+> uri.query_set({d: 'mom'})
+{ _scheme: 'http',
+  _authority: 'user:pass@www.example.com:3000',
+  _userinfo: 'user:pass',
+  _port: '3000',
+  _host: 'www.example.com',
+  _path_leading_slash: true,
+  _path_trailing_slash: false,
+  _path: [ 'a', 'b', undefined ],
+  _fragment: 'fragment',
+  _query: [ [ 'd' ], [ 'mom' ] ] }
+> uri.query_get()
+{ d: 'mom' }
+> uri.to_string()
+'http://user:pass@www.example.com:3000/a/b/c?d=mom#fragment'
+
+// Append onto the query params
+> uri.query_push({g: 'hello'})
+> uri.to_string()
+'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3&g=hello#fragment'
+> uri.query_get()
+{ d: 'dad', e: '1', f: '12.3', g: 'hello' }
+
+// Watch out for double param keys with query_push()!
+> uri.query_push({d: 666})
+> uri.to_string()
+'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3&&d=666#fragment'
+> uri.query_get()
+{ d: 'dad', e: '1' }
+> uri.query_get_all()
+{ d: [ '1', '1', 666 ],
+  e: [ '1' ] }
+
+// Append onto or update the query params
+> uri.query_merge({d: 'mom', g: 'hello'})
+> uri.to_string()
+'http://user:pass@www.example.com:3000/a/b/c?d=mom&e=1&f=12.3&g=hello#fragment'
+> uri.query_get()
+{ d: 'mom', e: '1', g: 'hello' }
+
+// Clear the query parameters
+> uri.query_get()
+{ d: 'dad', e: '1', f: '12.3' }
+> uri.query_clear()
+> uri.query_get()
+{}
+> uri.to_string()
+'http://user:pass@www.example.com:3000/a/b/c#fragment'
+```
+
 API (generated from tests)
 ===
 
