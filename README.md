@@ -88,7 +88,7 @@ $ node
 > uri.query_get()
 { d: 'dad', e: '1', f: '12.3', g: 'hello' }
 
-// Watch out for double param keys with query_push()!
+// Watch out for double param keys with query_push()! Although they are useful and in spec unless you are using PHPs flawed querystring parser.
 > uri.query_push({d: 666})
 > uri.to_string()
 'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3&&d=666#fragment'
