@@ -13,6 +13,8 @@ Installing
 Example Usage
 ===
 
+note: all methods are aliased to camelCase too - query_to_string === queryToString
+
 ```javascript
 $ node
 > YouAreI = require('YouAreI')
