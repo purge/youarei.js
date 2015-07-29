@@ -17,7 +17,7 @@ note: all methods are aliased to camelCase too - query_to_string === queryToStri
 
 ```javascript
 $ node
-> YouAreI = require('YouAreI')
+> YouAreI = require('youarei')
 
 // initializing the object
 > var uri = new YouAreI('http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment');
