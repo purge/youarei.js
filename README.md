@@ -66,8 +66,6 @@ $ node
 // all examples begin fresh with
 > var uri = new YouAreI('http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment')
 
-// Replace the query parameters
-> uri.query_set({d: 'mom'})
 { _scheme: 'http',
   _authority: 'user:pass@www.example.com:3000',
   _userinfo: 'user:pass',
@@ -75,9 +73,12 @@ $ node
   _host: 'www.example.com',
   _path_leading_slash: true,
   _path_trailing_slash: false,
-  _path: [ 'a', 'b', undefined ],
+  _path: [ 'a', 'b', 'c' ],
   _fragment: 'fragment',
-  _query: [ [ 'd' ], [ 'mom' ] ] }
+  _query: [ [ 'd', 'e', 'f' ], [ 'dad', '1', '12.3' ] ] }
+
+// Replace the query parameters
+> uri.query_set({d: 'mom'})
 > uri.query_get()
 { d: 'mom' }
 > uri.to_string()
