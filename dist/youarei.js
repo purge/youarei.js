@@ -98,8 +98,8 @@
         return spl;
       },
 
-      path_to_string: function(opt_path) {
-        path = (opt_path || this._path).join("/");
+      path_to_string: function(path) {
+        path = (path || this._path).join("/");
         if (this._path_leading_slash) path = '/' + path;
         if (this._path_trailing_slash) path = path + '/';
         return path;
