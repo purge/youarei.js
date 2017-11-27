@@ -15,7 +15,7 @@
     "querystring"
   ],
   "author": "Simon Elliott",
-  "license": "BSD-2-Clause",
+  "license": "MIT",
   "devDependencies": {
     "karma-mocha": "~0.1.0",
     "karma-chai": "0.0.2",
