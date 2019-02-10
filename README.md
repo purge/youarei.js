@@ -1,194 +1,178 @@
-youarei.js
-==========
+# youarei
 
-A Javascript (UMD, node) module with sane query parameter handling. About 1k gzipped.
+> A composable and fully typed (typescript) libary for working with query strings and paths. If you're bored with writing
+> `(typeof query.foo === 'string')` in your code this might be for you. Comes with some useful casting
+> functions for ensuring you are always getting `boolean`, `boolean[]`, `string`, `string[]` or even a `Date` / `Date[]`.
+> You can easily provide your own [type casting function](#custom-types) to work with your design. Extensively tested with 100% code coverage. Relevant functions are memoized for performance using `mem`
 
-Installing
-==========
+![](https://travis-ci.com/purge/youarei.js.svg?branch=next)
+![](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 
-`npm install youarei`
+### Examples
 
-`bower install youarei`
+[Usage](#example-usage)
 
-Example Usage
-===
+[Type Casting](#type-casting)
 
-note: all methods are aliased to camelCase too - query_to_string === queryToString
+[Custom Type Casting](#custom-types)
 
-```javascript
-$ node
-> YouAreI = require('youarei')
+[Mutators](#mutators)
 
-// initializing the object
-> var uri = new YouAreI('http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment');
+### API
 
-// FORMATTING URI COMPONENTS
-> uri.query_get()
-{ d: 'dad', e: '1', f: '12.3' }
+[Query String](#example-usage-plain)
 
-> uri.query_get_all()
-{ d: [ 'dad' ],
-  e: [ '1' ],
-  f: [ '12.3' ]
+[Path](#example-usage-plain)
 
-> uri.query_to_string()
-'d=dad&e=1&f=12.3'
+[Installing](#installing)
 
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment'
+### Example Usage
 
-// RETRIEVING URI COMPONENTS
-> uri.scheme()
-'http'
+While this example uses React, youarei is framework agnostic. There is a react hook compatible
+with react-router available if you would prefer to avoid the boilerplate `history.push` and passing of `location`
+the example uses the long-hand method for clarity.
 
-> uri.user_info()
-'user:pass'
+```jsx
 
-> uri.host()
-'www.example.com'
+import useSearchValue, {appendValue, removeValue} from 'youarei'
 
-> uri.port()
-'3000'
+const pageParams = useSearchValue({
+  page: "string", // ?page=1
+  filter: "string[]", // ?filter=a&filter=b
+  showDetails: "boolean", // ?showDetails
+})
 
-> uri.path_to_string()
-'/a/b/'
+const ToggleComponent = ({history, location: {search}}) => {
+  const [value, set] = pageParams(search)
+  const setQuery = search => history.push({search})
 
-> uri.fragment()
-'fragment'
+  const {
+    showDetails, // typed as 'boolean'
+    filter, // typed as 'string[]'
+    page, //typed as 'string'
+  } = value
 
-> uri.path_parts()
-[ 'a', 'b', 'c' ]
+  const handleChecked = checked => setQuery(set.showDetails(checked))
+  const handlePageChange = e => setQuery(set.page(e.currentTarget.value))
+  const toggleFilter = filterValue => checked =>
+    setQuery(set.filter(
+      e.currentTarget.value,
+      filterValue,
+      checked ? removeValue : appendValue
+    ))
 
-> uri.path_to_dir()
-'/a/b/'
+  return (
+    <div>
+      <select onChange={handlePageChange}>
+        <option value="1">Page 1</option>
+        <option value="2">Page 2</option>
+      </select>
 
-// MUTATING THE URI
-// all examples begin fresh with
-> var uri = new YouAreI('http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment')
+      <input
+        checked={showDetails} type="checkbox" onChecked={handleChecked}
+      /> Toggle Full Details
 
-{ _scheme: 'http',
-  _authority: 'user:pass@www.example.com:3000',
-  _userinfo: 'user:pass',
-  _port: '3000',
-  _host: 'www.example.com',
-  _path_leading_slash: true,
-  _path_trailing_slash: false,
-  _path: [ 'a', 'b', 'c' ],
-  _fragment: 'fragment',
-  _query: [ [ 'd', 'e', 'f' ], [ 'dad', '1', '12.3' ] ] }
-
-// Replace the query parameters
-> uri.query_set({d: 'mom'})
-> uri.query_get()
-{ d: 'mom' }
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=mom#fragment'
-
-// Append onto the query params
-> uri.query_push({g: 'hello'})
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3&g=hello#fragment'
-> uri.query_get()
-{ d: 'dad', e: '1', f: '12.3', g: 'hello' }
-
-// Watch out for double param keys with query_push()! Although they are useful and in spec unless you are using PHPs flawed querystring parser.
-> uri.query_push({d: 666})
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3&&d=666#fragment'
-> uri.query_get()
-{ d: 'dad', e: '1' }
-> uri.query_get_all()
-{ d: [ '1', '1', 666 ],
-  e: [ '1' ] }
-
-// Append onto or update the query params
-> uri.query_merge({d: 'mom', g: 'hello'})
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=mom&e=1&f=12.3&g=hello#fragment'
-> uri.query_get()
-{ d: 'mom', e: '1', g: 'hello' }
-
-// Clear the query parameters
-> uri.query_get()
-{ d: 'dad', e: '1', f: '12.3' }
-> uri.query_clear()
-> uri.query_get()
-{}
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c#fragment'
-```
-
-API (generated from tests)
-===
-
-Note: All methods are aliased to their camelCase alternative.
+      {[1,2,3,4].map(i => (
+        <input
+          checked={value.filters.contains(i)}
+          type="checkbox"
+          onChecked={toggleFilter(i)}
+        /> Filter {i}
+      ))}
+    </div>
+  )
 
 ```
 
-Start:
-  new YouAreI()
-    ✓ Should accept regular URI (http://www.example.com)
-    ✓ Should accept schemeless URI ( www.example.com )
-    ✗ Should accept empty URI (skipped)
-    ✗ Throw exception on malformed URIs (skipped)
-    ✓ Should be chainable
-    methods
-      URI parts for http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment
-        toString()
-          ✓ should toString back to source representation
-        scheme()
-          ✓ should return scheme ( http )
-        user_info()
-          ✓ should return userinfo ( user:pass )
-        host()
-          ✓ should return host ( www.example.com )
-        port()
-          ✓ should return port ( 3000 )
-        path_to_string()
-          ✓ should return path ( /a/b/c )
-        fragment()
-          ✓ should return fragment ( fragment )
-      query
-        query_to_string()
-          ✓ should to_string back to source representation
-        query_get()
-          ✓ should return the query dictionary containing the first value of multis
-        query_get_all()
-          ✓ should return query dictionary always using an array regardless, {d: [1,1], e: [1]}
-        query_set()
-          ✓ should merge the new value with the existing query
-          ✓ should replace the entire query with the new value
-          ✓ no parameters should reset the query to blank
-        query_clear()
-          ✓ should clear the query
-        query_push()
-          ✓ should append the new value adding new if it doesn't exist
-          ✓ should append the new value to an existing key if it exists
-        query_merge()
-          ✓ should merge with existing values
-          ✓ should remove key:val if val is set to null
-          ✓ should merge multiple values too, preserving order
-    path
-      path_parts()
-        ✓ should set path
-        ✓ should return array of path parts
-      path_to_dir()
-        ✓ should return the path without script
-        ✓ should return the path without script (with trailing slash)
-      path_basename_set()
-        ✓ should set the basename to value (i.e test.html) after trailing slash
-        ✓ should set the basename to value (i.e test.html)
-      path_extension_set()
-        ✗ should set the extension on basename (skipped)
-        ✗ should throw error when not possible (skipped)
-    partial urls
-      ✓ handles just path
-    clone()
-      ✓ should clone the url
+You can also set several query parameters at once using the `set()` chain
 
-Finished in 0.005 secs
-
-SUMMARY:
-✓ 30 tests completed
-- 4 tests skipped
+```jsx
+const pageParams = useSearchValue({
+  x: "string",
+  y: "string",
+})("x=100&y=100")
+set(set.x("150"), set.y("150"))
 ```
+
+If you only want to get a single query value, there is a short-hand option
+
+```jsx
+const [value, set] = useSearchValue("foo", "string")("foo=bar")
+value === "bar"
+set("gorch") === "foo=gorch"
+```
+
+### Type Casting
+
+These types can be provided as a value to the configurator `useSearchValue`
+
+#### string / string[]
+
+Will always return a string or array of strings
+
+#### boolean / boolean[]
+
+Will always return a string or array of booleans.
+
+#### Date / Date[]
+
+Will always return a string or array of Dates.
+
+### Custom Types
+
+You can write your own wrapper around an existing
+
+### Mutators
+
+The following mutators for query data are provided. You can also provide your own matching the same signature.
+
+#### omit
+
+Omit the named query completely, i.e
+
+```jsx
+set("test", omit)("?a=b&test=1&test=2") === "?a=b"
+```
+
+#### replace
+
+Replace or add the name + value to the query (default mutator)
+
+```jsx
+set("test", ["value"], replace)("?a=b&test=1&test=2") === "?a=b&test=value"
+set("new", ["value"], replace)("?a=b&test=&test=2") ===
+  "?a=b&test=&test=2&new=value"
+```
+
+#### appendValue
+
+Append (or create) a value to a named query
+
+```jsx
+set("test", ["value"], appendValue)("?a=b&test=1&test=2") ===
+  "?a=b&test=1&test=2&test=value"
+set("test", ["value", "value2"], appendValue)("?a=b&test=1&test=2") ===
+  "?a=b&test=1&test=2&test=value&test=value2"
+set("new", ["value"], appendValue)("?a=b&test=1&test=2") ===
+  "?a=b&test=1&test=2&new=value"
+```
+
+#### removeValue
+
+remove value from a named query
+
+```jsx
+set("test", ["1"], removeValue)("?a=b&test=1&test=2") ===
+  "?a=b&test=2&test=value"
+set("test", ["1", "2"], removeValue)("?a=b&test=1&test=2") === "?a=b"
+```
+
+### Install
+
+```
+$ yarn add youarei
+```
+
+### Licence
+
+MIT &copy; Simon Elliott
