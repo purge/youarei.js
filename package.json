@@ -1,30 +1,37 @@
 {
   "name": "youarei",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "URI specialist",
-  "main": "src/youarei.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
   "browser": "dist/youarei.min.js",
   "repository": "https://github.com/purge/youarei.js",
-  "directories": {
-    "test": "test"
-  },
+  "sideEffects": false,
   "keywords": [
     "uri",
     "url",
     "query",
-    "querystring"
+    "querystring",
+    "qs",
+    "search",
+    "router"
   ],
   "author": "Simon Elliott",
   "license": "MIT",
   "devDependencies": {
-    "karma-mocha": "~0.1.0",
-    "karma-chai": "0.0.2",
-    "karma-phantomjs-launcher": "~0.1.0",
-    "karma-coffee-preprocessor": "~0.1.0"
+    "@types/jest": "^24.0.0",
+    "@types/node": "^10.12.24",
+    "jest": "^24.1.0",
+    "ts-jest": "^23.10.5",
+    "tslint": "^5.12.1",
+    "typescript": "^3.3.3"
   },
-  "dependencies": { },
+  "dependencies": {},
   "scripts": {
-    "test": "karma start",
-    "build-js": "cp src/youarei.js dist/youarei.js && uglifyjs src/youarei.js > dist/youarei.min.js"
+    "test": "ts-jest",
+    "build": "tsc --build tsconfig.json"
   }
 }
