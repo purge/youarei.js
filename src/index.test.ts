@@ -20,6 +20,8 @@ import {
   types,
 } from "./query"
 
+import R from "ramda"
+
 const testSearch = "?simple=1&array=2&array=3&boolean"
 test("parse", () => {
   expect(
@@ -248,11 +250,20 @@ test("type 'boolean'", () => {
   expect(set(false)).toBe("?simple=1&array=2&array=3")
 })
 
+test("type 'boolean[]'", () => {
+  const [value, set] = types["boolean[]"](testSearch, "boolean")
+  expect(value).toMatchObject([true])
+  expect(set([false])).toBe("?simple=1&array=2&array=3")
+})
+
 test("useSearchValue", () => {
   const [get, set] = useSearchValue({
     simple: "string",
     array: "string[]",
   })(testSearch)
+
+  if (get.simple === true) {
+  }
 
   expect(get).toMatchObject({
     simple: "1",
@@ -261,7 +272,7 @@ test("useSearchValue", () => {
 
   expect(set.simple("2")).toBe("?simple=2&array=2&array=3&boolean")
 
-  //   expect(set([set.simple("5"), set.simple("3", appendValue)])).toBe(
-  //     "?simple=5&simple=3&array=2&array=3&boolean",
-  //   )
+  expect(set.simple("3", appendValue, set.simple("5"))).toBe(
+    "?simple=5&simple=3&array=2&array=3&boolean",
+  )
 })

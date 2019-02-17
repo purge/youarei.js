@@ -1,4 +1,5 @@
 import memoize from "mem"
+import { transpose } from "ramda/es/transpose"
 import { replace, omit, appendValue, removeValue } from "./queryMutators"
 export { replace, omit, appendValue, removeValue }
 
@@ -56,8 +57,7 @@ export const deparseSearch = memoize((queryObject: QueryStruct) => {
 
 export type QueryResultAsSingle<ResultType = QueryValueAllTypes> = [
   QueryValue<ResultType>,
-  (input: ResultType, ...args: any) => string,
-  { name: string }
+  (input: ResultType, ...args: any) => string
 ]
 
 export const nameDoesntExist = []
@@ -89,8 +89,7 @@ export const setQueryValue: SetQueryValue = (
 
 export type QueryResultAsArray<ResultType = QueryValueAllTypes> = [
   QueryValue<ResultType>[],
-  Function,
-  { name: string }
+  Function
 ]
 
 const _useQueryValue = (
@@ -117,39 +116,37 @@ const _useQueryValue = (
 
       return setQueryValue(query, name, value, operation)
     },
-    { name },
   ]
 }
 
 export const useQueryValue = memoize(_useQueryValue)
 
-export const castToString = ([get, set, meta]: QueryResultAsArray<
+export const castToString = ([get, set]: QueryResultAsArray<
   QueryValueAllTypes
 >): QueryResultAsArray<QueryValueString> => {
   return [
     get.map(v => (typeof v === "string" ? v : undefined)),
-    (values: QueryValueString[], ...args: any) => set(values, ...args),
-    meta,
+    (values: QueryValueString[], op: string | Function, next?: string) =>
+      set(values, op, next),
   ]
 }
 
-export const castToBoolean = ([get, set, meta]: QueryResultAsArray<
+export const castToBoolean = ([get, set]: QueryResultAsArray<
   QueryValueAllTypes
 >): QueryResultAsArray<QueryValueBoolean> => {
   return [
     get.map(v => (typeof v === "boolean" ? v : false)),
-    (value: QueryValueBoolean[], ...args: any) => set(value, ...args),
-    meta,
+    (values: QueryValueBoolean[], op: string | Function, next?: string) =>
+      set(values, op, next),
   ]
 }
 
-export function castToSingle<ValueType>([get, set, meta]: QueryResultAsArray<
+export function castToSingle<ValueType>([get, set]: QueryResultAsArray<
   ValueType
 >): QueryResultAsSingle<ValueType> {
   return [
     get[0],
     (value: QueryValue<ValueType>, ...args: any) => set([value], ...args),
-    meta,
   ]
 }
 
@@ -165,48 +162,54 @@ const boolean = (rawQuery: SearchString, name: string) =>
 const booleanArray = (rawQuery: SearchString, name: string) =>
   castToBoolean(useQueryValue(rawQuery, name))
 
-export const types = {
+interface Types {
+  readonly string: typeof string
+  readonly boolean: typeof boolean
+  readonly "boolean[]": typeof booleanArray
+  readonly "string[]": typeof stringArray
+}
+
+export const types: Types = {
   string,
   boolean,
   "boolean[]": booleanArray,
   "string[]": stringArray,
 }
 
-export const mergeRight = (toCombine: Array<Function>): string => {
-  let result = ""
-  toCombine.forEach(f => {
-    result = f(result)
-  })
-  return result
+type Modifier = (a: SearchString, b: string, ...args: any) => any
+type Configuration = { [name: string]: keyof Types | Modifier }
+function isModifier(thing: keyof Types | Modifier): thing is Modifier {
+  return typeof (<Modifier>thing) === "function"
 }
 
-// type ValueOf<A> = A[keyof A]
+type R1 =
+  | ReturnType<typeof string>
+  | ReturnType<typeof boolean>
+  | ReturnType<typeof stringArray>
+  | ReturnType<typeof booleanArray>
 
-// FIXME needs queryFirst option
-export const useSearchValue = (queries: {
-  [name: string]: keyof typeof types
-}) => {
-  return (
-    search: SearchString,
-  ): [{ [name: string]: typeof types }, { [name: string]: Function }] => {
-    const values: { [name: string]: any } = {}
-    const setters: any = (toRun: any) => mergeRight(toRun)
+type R1Get = { [name: string]: R1[0] }
+type R1Set = { [name: string]: R1[1] }
+
+export const useSearchValue = (queries: Configuration) => {
+  return (search: SearchString): [R1Get, R1Set] => {
+    const get: R1Get = {}
+    const set: R1Set = {}
+
     Object.keys(queries).forEach(q => {
-      const fn = types[queries[q]]
-      const [get, set] = fn(search, q)
-      values[q] = get
-      setters[q] = set
+      const value = queries[q]
+      const fn = isModifier(value) ? value : types[value]
+      const modifier = fn(search, q)
+      if (value === "string") {
+        ;[get[q], set[q]] = modifier as ReturnType<typeof string>
+      } else if (value === "boolean") {
+        ;[get[q], set[q]] = modifier as ReturnType<typeof boolean>
+      } else if (value === "boolean[]") {
+        ;[get[q], set[q]] = modifier as ReturnType<typeof booleanArray>
+      } else if (value === "string[]") {
+        ;[get[q], set[q]] = modifier as ReturnType<typeof stringArray>
+      }
     })
-
-    return [values, setters]
-    //     const value: { [key: string]: QueryValue[] } = {}
-    //     const setters: any = (toRun: any) => mergeRight(toRun)
-    //     // queries.forEach(q => {
-    //     //   const [get, set, meta] = q(search)
-    //     //   value[meta.name] = get
-    //     //   setters[meta.name] = (...args: any) => (lastValue: string) =>
-    //     //     set(...args, lastValue)
-    //     // })
-    //     return [value, setters]
+    return [get, set]
   }
 }
