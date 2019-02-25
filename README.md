@@ -28,18 +28,18 @@
 
 ### Example Usage
 
-While this example uses React, youarei is framework agnostic. There is a react hook compatible
+While this example uses React, youarei is framework agnostic. There is a react hook-esque helper
 with react-router available if you would prefer to avoid the boilerplate `history.push` and passing of `location`
 the example uses the long-hand method for clarity.
 
 ```jsx
 
-import useSearchValue, {appendValue, removeValue} from 'youarei'
+import useSearchValue, {appendValue, removeValue, string, stringArray, boolean} from 'youarei'
 
 const pageParams = useSearchValue({
-  page: "string", // ?page=1
-  filter: "string[]", // ?filter=a&filter=b
-  showDetails: "boolean", // ?showDetails
+  page: string, // ?page=1
+  filter: stringArray, // ?filter=a&filter=b
+  showDetails: boolean, // ?showDetails
 })
 
 const ToggleComponent = ({history, location: {search}}) => {
@@ -86,35 +86,39 @@ const ToggleComponent = ({history, location: {search}}) => {
 
 You can also set several query parameters at once using the `set()` chain
 
-```jsx
+```js
 const pageParams = useSearchValue({
-  x: "string",
-  y: "string",
-})("x=100&y=100")
-set(set.x("150"), set.y("150"))
+  x: string,
+  y: string
+})("x=100&y=100");
+set(set.x("150"), set.y("150"));
 ```
 
 If you only want to get a single query value, there is a short-hand option
 
-```jsx
-const [value, set] = useSearchValue("foo", "string")("foo=bar")
-value === "bar"
-set("gorch") === "foo=gorch"
+```js
+const [value, set] = useSearchValue("foo", string)("foo=bar");
+value === "bar";
+set("gorch") === "foo=gorch";
 ```
 
 ### Type Casting
 
 These types can be provided as a value to the configurator `useSearchValue`
 
-#### string / string[]
+#### string / stringArray
 
 Will always return a string or array of strings
 
-#### boolean / boolean[]
+#### boolean / booleanArray
 
 Will always return a string or array of booleans.
 
-#### Date / Date[]
+#### object
+
+Will always return an object (query string value put through JSON.stringify)
+
+#### Date / DateArray
 
 Will always return a string or array of Dates.
 
@@ -130,41 +134,41 @@ The following mutators for query data are provided. You can also provide your ow
 
 Omit the named query completely, i.e
 
-```jsx
-set("test", omit)("?a=b&test=1&test=2") === "?a=b"
+```js
+set("test", omit)("?a=b&test=1&test=2") === "?a=b";
 ```
 
 #### replace
 
 Replace or add the name + value to the query (default mutator)
 
-```jsx
-set("test", ["value"], replace)("?a=b&test=1&test=2") === "?a=b&test=value"
+```js
+set("test", ["value"], replace)("?a=b&test=1&test=2") === "?a=b&test=value";
 set("new", ["value"], replace)("?a=b&test=&test=2") ===
-  "?a=b&test=&test=2&new=value"
+  "?a=b&test=&test=2&new=value";
 ```
 
 #### appendValue
 
 Append (or create) a value to a named query
 
-```jsx
+```js
 set("test", ["value"], appendValue)("?a=b&test=1&test=2") ===
-  "?a=b&test=1&test=2&test=value"
+  "?a=b&test=1&test=2&test=value";
 set("test", ["value", "value2"], appendValue)("?a=b&test=1&test=2") ===
-  "?a=b&test=1&test=2&test=value&test=value2"
+  "?a=b&test=1&test=2&test=value&test=value2";
 set("new", ["value"], appendValue)("?a=b&test=1&test=2") ===
-  "?a=b&test=1&test=2&new=value"
+  "?a=b&test=1&test=2&new=value";
 ```
 
 #### removeValue
 
 remove value from a named query
 
-```jsx
+```js
 set("test", ["1"], removeValue)("?a=b&test=1&test=2") ===
-  "?a=b&test=2&test=value"
-set("test", ["1", "2"], removeValue)("?a=b&test=1&test=2") === "?a=b"
+  "?a=b&test=2&test=value";
+set("test", ["1", "2"], removeValue)("?a=b&test=1&test=2") === "?a=b";
 ```
 
 ### Install

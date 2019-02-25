@@ -8,12 +8,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/purge/youarei.js"
+    "url": "https://github.com/purge/youarei"
   },
   "bugs": {
-    "url": "https://github.com/purge/youarei.js/issues"
+    "url": "https://github.com/purge/youarei/issues"
   },
-  "homepage": "https://github.com/purge/youarei.js#readme",
+  "homepage": "https://github.com/purge/youarei#readme",
   "sideEffects": false,
   "keywords": [
     "uri",
@@ -27,20 +27,20 @@
   "author": "Simon Elliott",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "^24.0.5",
-    "@types/node": "^11.9.4",
-    "@types/ramda": "^0.25.50",
-    "jest": "^24.1.0",
+    "@types/jest": "^24.0.17",
+    "@types/node": "^12.7.2",
+    "@types/ramda": "^0.26.19",
+    "jest": "^24.9.0",
     "ramda": "^0.26.1",
-    "ts-jest": "^23.10.5",
-    "tslint": "^5.12.1",
-    "typescript": "^3.3.3"
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3",
+    "lodash": "^4.17.15"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.121",
-    "@types/mem": "^1.1.2",
-    "lodash": "^4.17.11",
-    "mem": "^4.1.0"
+    "@types/lodash": "^4.14.137",
+    "@types/mem": "^4.2.0",
+    "mem": "^5.1.1"
   },
   "scripts": {
     "test": "jest src",

@@ -1,5 +1,5 @@
-export { pathParse, pathDir, pathBasenameSet } from "./path"
-export { parseURI } from "./uri"
+export { pathParse, pathDir, pathBasenameSet } from "./path";
+export { parseURI } from "./uri";
 export {
   parseSearch,
   replace,
@@ -7,4 +7,5 @@ export {
   removeValue,
   appendValue,
   useSearchValue,
-} from "./query"
+  QueryValue,
+} from "./query";

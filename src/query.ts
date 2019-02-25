@@ -1,5 +1,4 @@
 import memoize from "mem"
-import { transpose } from "ramda/es/transpose"
 import { replace, omit, appendValue, removeValue } from "./queryMutators"
 export { replace, omit, appendValue, removeValue }
 
@@ -150,66 +149,48 @@ export function castToSingle<ValueType>([get, set]: QueryResultAsArray<
   ]
 }
 
-const string = (rawQuery: SearchString, name: string) =>
+export const string = (rawQuery: SearchString, name: string) =>
   castToSingle(castToString(useQueryValue(rawQuery, name)))
 
-const stringArray = (rawQuery: SearchString, name: string) =>
+string.type = "string"
+
+export const stringArray = (rawQuery: SearchString, name: string) =>
   castToString(useQueryValue(rawQuery, name))
 
-const boolean = (rawQuery: SearchString, name: string) =>
+stringArray.type = "stringArray"
+
+export const boolean = (rawQuery: SearchString, name: string) =>
   castToSingle(castToBoolean(useQueryValue(rawQuery, name)))
 
-const booleanArray = (rawQuery: SearchString, name: string) =>
+boolean.type = "boolean"
+
+export const booleanArray = (rawQuery: SearchString, name: string) =>
   castToBoolean(useQueryValue(rawQuery, name))
 
-interface Types {
-  readonly string: typeof string
-  readonly boolean: typeof boolean
-  readonly "boolean[]": typeof booleanArray
-  readonly "string[]": typeof stringArray
-}
+booleanArray.type = "booleanArray"
 
-export const types: Types = {
-  string,
-  boolean,
-  "boolean[]": booleanArray,
-  "string[]": stringArray,
-}
+// type Getter<T> = { [P in keyof T]: T[P] }
+// type Setter<T> = { [P in keyof T]: T[P] }
 
-type Modifier = (a: SearchString, b: string, ...args: any) => any
-type Configuration = { [name: string]: keyof Types | Modifier }
-function isModifier(thing: keyof Types | Modifier): thing is Modifier {
-  return typeof (<Modifier>thing) === "function"
-}
+// type Proxify<T> = [Getter<T>, Setter<T>]
 
-type R1 =
-  | ReturnType<typeof string>
-  | ReturnType<typeof boolean>
-  | ReturnType<typeof stringArray>
-  | ReturnType<typeof booleanArray>
-
-type R1Get = { [name: string]: R1[0] }
-type R1Set = { [name: string]: R1[1] }
-
-export const useSearchValue = (queries: Configuration) => {
-  return (search: SearchString): [R1Get, R1Set] => {
-    const get: R1Get = {}
-    const set: R1Set = {}
-
-    Object.keys(queries).forEach(q => {
-      const value = queries[q]
-      const fn = isModifier(value) ? value : types[value]
-      const modifier = fn(search, q)
-      if (value === "string") {
-        ;[get[q], set[q]] = modifier as ReturnType<typeof string>
-      } else if (value === "boolean") {
-        ;[get[q], set[q]] = modifier as ReturnType<typeof boolean>
-      } else if (value === "boolean[]") {
-        ;[get[q], set[q]] = modifier as ReturnType<typeof booleanArray>
-      } else if (value === "string[]") {
-        ;[get[q], set[q]] = modifier as ReturnType<typeof stringArray>
+export function useSearchValue<A>(config: A) {
+  return (search: SearchString) => {
+    const get: { [k: string]: unknown } = {}
+    const set: { [k: string]: unknown } = {}
+    for (const q in config) {
+      const fn = config[q]
+      if (!fn || typeof fn !== "function") {
+        throw new Error("Must pass function as value for named query")
       }
-    })
+
+      const res = fn(search, q)
+      if (Array.isArray(res)) {
+        get[q] = res[0]
+        set[q] = res[1]
+      }
+    }
+
     return [get, set]
   }
 }
