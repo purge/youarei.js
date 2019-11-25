@@ -1,124 +1,122 @@
-import memoize from "mem"
-import { replace, omit, appendValue, removeValue } from "./queryMutators"
-export { replace, omit, appendValue, removeValue }
+import memoize from "mem";
+import { replace, omit, appendValue, removeValue } from "./queryMutators";
+export { replace, omit, appendValue, removeValue };
 
-const qp_re = /^([^=]+)(?:=(.*))?$/
+const qp_re = /^([^=]+)(?:=(.*))?$/;
 
 const cleanValue = (v?: string): string | true =>
-  v ? decodeURIComponent(v.replace(/\+/g, " ")) : true
+  v ? decodeURIComponent(v.replace(/\+/g, " ")) : true;
 
-export type SearchString = string
-export type QueryValueBoolean = boolean
-export type QueryValueString = string | undefined
-export type QueryValueAllTypes = QueryValueBoolean | QueryValueString
-export type QueryValue<ResultType = QueryValueAllTypes> = ResultType
-export type QueryStruct = { [name: string]: Array<QueryValue> }
+export type SearchString = string;
+export type QueryValueBoolean = boolean;
+export type QueryValueString = string | undefined;
+export type QueryValueAllTypes = QueryValueBoolean | QueryValueString;
+export type QueryValue<ResultType = QueryValueAllTypes> = ResultType;
+export type QueryStruct = { [name: string]: Array<QueryValue> };
 
 export const parseSearch = memoize(
   (_searchString: string): QueryStruct => {
-    const output: QueryStruct = {}
+    const output: QueryStruct = {};
     const searchString =
-      _searchString[0] === "?" ? _searchString.substr(1) : _searchString
-    const pairs = searchString.split(/&|;/)
+      _searchString[0] === "?" ? _searchString.substr(1) : _searchString;
+    const pairs = searchString.split(/&|;/);
 
     for (var j = 0; j < pairs.length; j++) {
-      const pair = pairs[j].match(qp_re)
+      const pair = pairs[j].match(qp_re);
       if (pair) {
-        const [, k, v] = pair
+        const [, k, v] = pair;
         if (output[k]) {
-          output[k].push(cleanValue(v))
+          output[k].push(cleanValue(v));
         } else {
-          output[k] = [cleanValue(v)]
+          output[k] = [cleanValue(v)];
         }
       }
     }
 
-    return output
-  },
-)
+    return output;
+  }
+);
 
 export const deparseSearch = memoize((queryObject: QueryStruct) => {
-  const pairs: string[] = []
+  const pairs: string[] = [];
   Object.keys(queryObject).forEach(k => {
-    const vArr = queryObject[k]
+    const vArr = queryObject[k];
     vArr.forEach(v => {
       if (v === undefined || v === false) {
-        return
+        return;
       } else if (v === true) {
-        pairs.push(encodeURIComponent(k))
+        pairs.push(encodeURIComponent(k));
       } else {
-        pairs.push(encodeURIComponent(k) + "=" + encodeURIComponent(v))
+        pairs.push(encodeURIComponent(k) + "=" + encodeURIComponent(v));
       }
-    })
-  })
-  return pairs.length > 0 ? `?${pairs.join("&")}` : ""
-})
+    });
+  });
+  return pairs.length > 0 ? `?${pairs.join("&")}` : "";
+});
 
 export type QueryResultAsSingle<ResultType = QueryValueAllTypes> = [
   QueryValue<ResultType>,
   (input: ResultType, ...args: any) => string
-]
+];
 
-export const nameDoesntExist = []
+export const nameDoesntExist = [];
 
 export const getQueryValue = (
   rawQuery: SearchString,
-  name: string,
+  name: string
 ): QueryValue[] => {
-  const query = parseSearch(rawQuery)
-  return query[name] || nameDoesntExist
-}
+  const query = parseSearch(rawQuery);
+  return query[name] || nameDoesntExist;
+};
 
 type SetQueryValue = (
   rawQuery: SearchString,
   name: string,
   value: QueryValue[],
-  operation?: Function,
-) => SearchString
+  operation?: Function
+) => SearchString;
 
 export const setQueryValue: SetQueryValue = (
   rawQuery,
   name,
   value,
-  operation = replace,
+  operation = replace
 ) => {
-  const query = operation(parseSearch(rawQuery), name, value)
-  return deparseSearch(query)
-}
+  const query = operation(parseSearch(rawQuery), name, value);
+  return deparseSearch(query);
+};
 
 export type QueryResultAsArray<ResultType = QueryValueAllTypes> = [
   QueryValue<ResultType>[],
   Function
-]
+];
 
-const _useQueryValue = (
-  rawQuery: SearchString,
-  name: string,
-): QueryResultAsArray => {
-  return [
-    getQueryValue(rawQuery, name),
-    (
-      value: QueryValue[],
-      operationOrRawQuery?: string | Function,
-      nextRawQuery?: string,
-    ): SearchString => {
-      let operation = undefined
-      let query = nextRawQuery || rawQuery
+export const useQueryValue = memoize(
+  (rawQuery: SearchString, name: string): QueryResultAsArray => {
+    return [
+      getQueryValue(rawQuery, name),
+      (
+        value: QueryValue[],
+        operationOrRawQuery?: string | Function,
+        nextRawQuery?: string
+      ): SearchString => {
+        let operation = undefined;
+        let query = nextRawQuery || rawQuery;
 
-      if (operationOrRawQuery && typeof operationOrRawQuery === "function") {
-        operation = operationOrRawQuery
-      }
+        if (operationOrRawQuery && typeof operationOrRawQuery === "function") {
+          operation = operationOrRawQuery;
+        }
 
-      if (operationOrRawQuery && typeof operationOrRawQuery === "string") {
-        query = operationOrRawQuery
-      }
+        if (operationOrRawQuery && typeof operationOrRawQuery === "string") {
+          query = operationOrRawQuery;
+        }
 
-      return setQueryValue(query, name, value, operation)
-    },
-  ]
-}
-
-export const useQueryValue = memoize(_useQueryValue)
+        return setQueryValue(query, name, value, operation);
+      },
+    ];
+  },
+  { cacheKey: String }
+);
 
 export const castToString = ([get, set]: QueryResultAsArray<
   QueryValueAllTypes
@@ -127,8 +125,8 @@ export const castToString = ([get, set]: QueryResultAsArray<
     get.map(v => (typeof v === "string" ? v : undefined)),
     (values: QueryValueString[], op: string | Function, next?: string) =>
       set(values, op, next),
-  ]
-}
+  ];
+};
 
 export const castToBoolean = ([get, set]: QueryResultAsArray<
   QueryValueAllTypes
@@ -137,8 +135,8 @@ export const castToBoolean = ([get, set]: QueryResultAsArray<
     get.map(v => (typeof v === "boolean" ? v : false)),
     (values: QueryValueBoolean[], op: string | Function, next?: string) =>
       set(values, op, next),
-  ]
-}
+  ];
+};
 
 export function castToSingle<ValueType>([get, set]: QueryResultAsArray<
   ValueType
@@ -146,51 +144,60 @@ export function castToSingle<ValueType>([get, set]: QueryResultAsArray<
   return [
     get[0],
     (value: QueryValue<ValueType>, ...args: any) => set([value], ...args),
-  ]
+  ];
 }
 
-export const string = (rawQuery: SearchString, name: string) =>
-  castToSingle(castToString(useQueryValue(rawQuery, name)))
+type QueryCaster<T> = {
+  (rawQuery: SearchString, name: string): [
+    QueryValueString,
+    (input: QueryValueString, ...args: any) => T
+  ];
+  type: string;
+};
 
-string.type = "string"
+export const string: QueryCaster<string> = (rawQuery, name) =>
+  castToSingle(castToString(useQueryValue(rawQuery, name)));
+
+string.type = "string";
 
 export const stringArray = (rawQuery: SearchString, name: string) =>
-  castToString(useQueryValue(rawQuery, name))
+  castToString(useQueryValue(rawQuery, name));
 
-stringArray.type = "stringArray"
+stringArray.type = "stringArray";
 
 export const boolean = (rawQuery: SearchString, name: string) =>
-  castToSingle(castToBoolean(useQueryValue(rawQuery, name)))
+  castToSingle(castToBoolean(useQueryValue(rawQuery, name)));
 
-boolean.type = "boolean"
+boolean.type = "boolean";
 
 export const booleanArray = (rawQuery: SearchString, name: string) =>
-  castToBoolean(useQueryValue(rawQuery, name))
+  castToBoolean(useQueryValue(rawQuery, name));
 
-booleanArray.type = "booleanArray"
+booleanArray.type = "booleanArray";
 
+export function useSearchValue(name: string, type: function) {}
 // type Getter<T> = { [P in keyof T]: T[P] }
 // type Setter<T> = { [P in keyof T]: T[P] }
 
 // type Proxify<T> = [Getter<T>, Setter<T>]
 
-export function useSearchValue<A>(config: A) {
-  return (search: SearchString) => {
-    const get: { [k: string]: unknown } = {}
-    const set: { [k: string]: unknown } = {}
-    for (const q in config) {
-      const fn = config[q]
-      if (!fn || typeof fn !== "function") {
-        throw new Error("Must pass function as value for named query")
-      }
+// export function useSearchValue<A>(config: A) {
+//   return (search: SearchString) => {
+//     const get: { [k: string]: unknown } = {}
+//     const set: { [k: string]: unknown } = {}
+//     for (const q in config) {
+//       const fn = config[q]
+//       if (!fn || typeof fn !== "function") {
+//         throw new Error("Must pass function as value for named query")
+//       }
 
-      const res = fn(search, q)
-      if (Array.isArray(res)) {
-        get[q] = res[0]
-        set[q] = res[1]
-      }
-    }
+//       const res = fn(search, q)
+//       if (Array.isArray(res)) {
+//         get[q] = res[0]
+//         set[q] = res[1]
+//       }
+//     }
 
-    return [get, set]
-  }
-}
+//     return [get, set]
+//   }
+// }

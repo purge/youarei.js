@@ -18,7 +18,8 @@ export const replace = memoize(
         [name]: value,
       };
     }
-  }
+  },
+  { cacheKey: JSON.stringify }
 );
 
 export const omit = memoize(
@@ -31,7 +32,8 @@ export const omit = memoize(
     } else {
       return queryStruct;
     }
-  }
+  },
+  { cacheKey: JSON.stringify }
 );
 
 export const removeValue = memoize(
@@ -51,7 +53,8 @@ export const removeValue = memoize(
     } else {
       return queryStruct;
     }
-  }
+  },
+  { cacheKey: JSON.stringify }
 );
 
 export const appendValue = memoize(
@@ -64,5 +67,6 @@ export const appendValue = memoize(
       ...queryStruct,
       [name]: [...(queryStruct[name] || []), ...value],
     };
-  }
+  },
+  { cacheKey: JSON.stringify }
 );

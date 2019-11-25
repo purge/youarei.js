@@ -8,7 +8,7 @@ import {
   omit,
   removeValue,
   appendValue,
-  // useSearchValue
+  useSearchValue,
 } from ".";
 
 import {
@@ -66,10 +66,22 @@ test("parse", () => {
 });
 
 test("pathParse", () => {
-  expect(pathParse("/a/b/c")).toMatchObject([["a", "b", "c"], [true, false]]);
-  expect(pathParse("a/b/c")).toMatchObject([["a", "b", "c"], [false, false]]);
-  expect(pathParse("a/b/c/")).toMatchObject([["a", "b", "c"], [false, true]]);
-  expect(pathParse("/a/b/c/")).toMatchObject([["a", "b", "c"], [true, true]]);
+  expect(pathParse("/a/b/c")).toMatchObject([
+    ["a", "b", "c"],
+    [true, false],
+  ]);
+  expect(pathParse("a/b/c")).toMatchObject([
+    ["a", "b", "c"],
+    [false, false],
+  ]);
+  expect(pathParse("a/b/c/")).toMatchObject([
+    ["a", "b", "c"],
+    [false, true],
+  ]);
+  expect(pathParse("/a/b/c/")).toMatchObject([
+    ["a", "b", "c"],
+    [true, true],
+  ]);
 });
 
 test("pathDir", () => {
@@ -262,7 +274,7 @@ test("type 'boolean[]'", () => {
 
 test("useSearchValue (single)", () => {
   const [get] = useSearchValue("simple", string)(testSearch);
-  const [get2] = useSearchValue("simple", boolean)(testSearch);
+  // const [get2] = useSearchValue("simple", boolean)(testSearch);
   expect(get).toBe("1");
 });
 
