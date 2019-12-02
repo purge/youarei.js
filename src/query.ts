@@ -147,57 +147,48 @@ export function castToSingle<ValueType>([get, set]: QueryResultAsArray<
   ];
 }
 
-type QueryCaster<T> = {
-  (rawQuery: SearchString, name: string): [
-    QueryValueString,
-    (input: QueryValueString, ...args: any) => T
-  ];
-  type: string;
-};
-
-export const string: QueryCaster<string> = (rawQuery, name) =>
+export const string = (rawQuery: SearchString, name: string) =>
   castToSingle(castToString(useQueryValue(rawQuery, name)));
-
-string.type = "string";
 
 export const stringArray = (rawQuery: SearchString, name: string) =>
   castToString(useQueryValue(rawQuery, name));
 
-stringArray.type = "stringArray";
-
 export const boolean = (rawQuery: SearchString, name: string) =>
   castToSingle(castToBoolean(useQueryValue(rawQuery, name)));
-
-boolean.type = "boolean";
 
 export const booleanArray = (rawQuery: SearchString, name: string) =>
   castToBoolean(useQueryValue(rawQuery, name));
 
-booleanArray.type = "booleanArray";
-
-export function useSearchValue(name: string, type: function) {}
-// type Getter<T> = { [P in keyof T]: T[P] }
-// type Setter<T> = { [P in keyof T]: T[P] }
-
-// type Proxify<T> = [Getter<T>, Setter<T>]
-
-// export function useSearchValue<A>(config: A) {
-//   return (search: SearchString) => {
-//     const get: { [k: string]: unknown } = {}
-//     const set: { [k: string]: unknown } = {}
-//     for (const q in config) {
-//       const fn = config[q]
-//       if (!fn || typeof fn !== "function") {
-//         throw new Error("Must pass function as value for named query")
-//       }
-
-//       const res = fn(search, q)
-//       if (Array.isArray(res)) {
-//         get[q] = res[0]
-//         set[q] = res[1]
-//       }
-//     }
-
-//     return [get, set]
-//   }
-// }
+export function useSearchValue(
+  name: string,
+  kind: "string"
+): (search: SearchString) => QueryResultAsSingle<QueryValueString>;
+export function useSearchValue(
+  name: string,
+  kind: "boolean"
+): (search: SearchString) => QueryResultAsSingle<boolean>;
+export function useSearchValue(
+  name: string,
+  kind: "boolean[]"
+): (search: SearchString) => QueryResultAsArray<boolean>;
+export function useSearchValue(
+  name: string,
+  kind: "string[]"
+): (search: SearchString) => QueryResultAsArray<QueryValueString>;
+export function useSearchValue(
+  name: string,
+  kind: "string" | "string[]" | "boolean" | "boolean[]"
+) {
+  return (search: SearchString) => {
+    switch (kind) {
+      case "string":
+        return string(search, name);
+      case "string[]":
+        return stringArray(search, name);
+      case "boolean":
+        return boolean(search, name);
+      case "boolean[]":
+        return booleanArray(search, name);
+    }
+  };
+}

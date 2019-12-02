@@ -1,6 +1,6 @@
 {
   "name": "youarei",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.1",
   "description": "A composable and fully typed libary for working with query strings and paths.",
   "main": "lib/index.js",
   "files": [
@@ -28,7 +28,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^24.0.23",
-    "@types/node": "^12.12.13",
+    "@types/node": "^12.12.14",
     "@types/ramda": "^0.26.36",
     "jest": "^24.9.0",
     "ramda": "^0.26.1",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.149",
-    "mem": "^6.0.0"
+    "mem": "^6.0.1"
   },
   "scripts": {
     "test": "jest src",

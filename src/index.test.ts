@@ -273,9 +273,17 @@ test("type 'boolean[]'", () => {
 });
 
 test("useSearchValue (single)", () => {
-  const [get] = useSearchValue("simple", string)(testSearch);
-  // const [get2] = useSearchValue("simple", boolean)(testSearch);
+  const [get, set] = useSearchValue("simple", "string")(testSearch);
+  const [get2, set2] = useSearchValue("boolean", "boolean")(testSearch);
+  const [get3] = useSearchValue("boolean", "boolean[]")(testSearch);
+  const [get4] = useSearchValue("simple", "string[]")(testSearch);
   expect(get).toBe("1");
+  expect(get2).toBe(true);
+  expect(get3).toMatchObject([true]);
+  expect(get4).toMatchObject(["1"]);
+  expect(set("2")).toBe("?simple=2&array=2&array=3&boolean");
+  expect(set2(false)).toBe("?simple=1&array=2&array=3");
+  expect(set("2", set2(false))).toBe("?simple=2&array=2&array=3");
 });
 
 // test("useSearchValue", () => {
