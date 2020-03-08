@@ -7,10 +7,10 @@ const port_re = /:(\d+)$/;
 interface ParsedURL {
   scheme: string;
   host: string;
-  port: string | null;
+  port: string | undefined;
   path: string;
   search: string;
-  auth: string | null;
+  auth: string | undefined;
   fragment: string;
 }
 
@@ -23,8 +23,8 @@ export const parseURI = memoize(
     }
 
     let authority = urlParts[4];
-    let auth = null;
-    let port = null;
+    let auth: string | undefined;
+    let port: string | undefined;
     const authMatch = authority.match(auth_re);
     if (authMatch) {
       auth = authMatch[1];

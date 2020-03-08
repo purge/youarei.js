@@ -16,13 +16,16 @@ import {
   castToString,
   castToBoolean,
   getQueryValue,
-  deparseSearch,
+  buildSearchString,
   useQueryValue,
   stringArray,
   booleanArray,
-  boolean,
-  string,
+  booleanFirst,
+  stringFirst,
+  fromSearchShape,
+  QueryValueAllTypes,
 } from "./query";
+import { Mutator } from "./queryMutators";
 
 const testSearch = "?simple=1&array=2&array=3&boolean";
 test("parse", () => {
@@ -44,9 +47,9 @@ test("parse", () => {
     parseURI(`https://www.example.com/a/b/c${testSearch}#fragment`)
   ).toMatchObject({
     scheme: "https",
-    auth: null,
+    auth: undefined,
     host: "www.example.com",
-    port: null,
+    port: undefined,
     path: "/a/b/c",
     search: testSearch,
     fragment: "#fragment",
@@ -54,9 +57,9 @@ test("parse", () => {
 
   expect(parseURI(`https://www.example.com`)).toMatchObject({
     scheme: "https",
-    auth: null,
+    auth: undefined,
     host: "www.example.com",
-    port: null,
+    port: undefined,
     path: "",
     search: "",
     fragment: "",
@@ -106,96 +109,117 @@ test("parseSearch", () => {
     a: ["1"],
     b: [true],
   });
+  expect(parseSearch("")).toMatchObject({});
+});
+
+describe("deparseSearch", () => {
+  test("deparseSearch", () => {
+    expect(buildSearchString({})).toBe("");
+    expect(
+      buildSearchString({
+        simple: ["1"],
+        array: ["2", "3"],
+        boolean: [true],
+      })
+    ).toBe(testSearch);
+    expect(
+      buildSearchString({
+        a: ["1"],
+        b: [true],
+      })
+    ).toBe("?a=1&b");
+    expect(
+      buildSearchString({
+        a: [true, true],
+      })
+    ).toBe("?a&a");
+  });
 });
 
 const parsed = Object.freeze(parseSearch(testSearch));
-const testOperation = (f: Function, ...args: any): string =>
-  deparseSearch(f(parsed, ...args));
+const testOperation = (
+  f: Mutator,
+  k: string,
+  v?: QueryValueAllTypes[]
+): string => buildSearchString(f(parsed, k, v));
 
-test("deparseSearch", () => {
-  expect(deparseSearch({})).toBe("");
-});
+describe("operations", () => {
+  test("operation: replace", () => {
+    expect(testOperation(replace, "simple")).toBe(
+      "?simple=1&array=2&array=3&boolean"
+    );
+    expect(testOperation(replace, "simple", ["2"])).toBe(
+      "?simple=2&array=2&array=3&boolean"
+    );
 
-test("operation: replace", () => {
-  expect(testOperation(replace, "simple", ["2"])).toBe(
-    "?simple=2&array=2&array=3&boolean"
-  );
+    expect(testOperation(replace, "array", ["5"])).toBe(
+      "?simple=1&array=5&boolean"
+    );
 
-  expect(testOperation(replace, "array", ["5"])).toBe(
-    "?simple=1&array=5&boolean"
-  );
+    expect(testOperation(replace, "foo", ["bar"])).toBe(
+      `${testSearch}&foo=bar`
+    );
 
-  expect(testOperation(replace, "foo", ["bar"])).toBe(`${testSearch}&foo=bar`);
+    expect(testOperation(replace, "boolean2", [true])).toBe(
+      "?simple=1&array=2&array=3&boolean&boolean2"
+    );
 
-  expect(testOperation(replace, "boolean2", [true])).toBe(
-    "?simple=1&array=2&array=3&boolean&boolean2"
-  );
+    expect(testOperation(replace, "simple", [undefined])).toBe(
+      "?array=2&array=3&boolean"
+    );
 
-  expect(testOperation(replace, "simple", [undefined])).toBe(
-    "?array=2&array=3&boolean"
-  );
+    expect(testOperation(replace, "array", [undefined, undefined])).toBe(
+      "?simple=1&boolean"
+    );
+  });
 
-  expect(testOperation(replace, "array", [undefined, undefined])).toBe(
-    "?simple=1&boolean"
-  );
-});
+  test("operation: omit", () => {
+    expect(testOperation(omit, "simple")).toBe("?array=2&array=3&boolean");
+    expect(testOperation(omit, "doesntexist")).toBe(
+      "?simple=1&array=2&array=3&boolean"
+    );
+    expect(testOperation(omit, "boolean")).toBe("?simple=1&array=2&array=3");
+    expect(testOperation(omit, "array")).toBe("?simple=1&boolean");
+  });
 
-test("operation: omit", () => {
-  expect(testOperation(omit, "simple")).toBe("?array=2&array=3&boolean");
-  expect(testOperation(omit, "doesntexist")).toBe(
-    "?simple=1&array=2&array=3&boolean"
-  );
-  expect(testOperation(omit, "boolean")).toBe("?simple=1&array=2&array=3");
-  expect(testOperation(omit, "array")).toBe("?simple=1&boolean");
-});
+  test("operation: appendValue", () => {
+    expect(testOperation(appendValue, "simple")).toBe(
+      "?simple=1&array=2&array=3&boolean"
+    );
+    expect(testOperation(appendValue, "simple", ["2"])).toBe(
+      "?simple=1&simple=2&array=2&array=3&boolean"
+    );
+    expect(testOperation(appendValue, "foo", ["bar"])).toBe(
+      "?simple=1&array=2&array=3&boolean&foo=bar"
+    );
+    expect(testOperation(appendValue, "foo", [true])).toBe(
+      "?simple=1&array=2&array=3&boolean&foo"
+    );
+    expect(testOperation(appendValue, "array", ["4", "5"])).toBe(
+      "?simple=1&array=2&array=3&array=4&array=5&boolean"
+    );
+  });
 
-test("operation: appendValue", () => {
-  expect(testOperation(appendValue, "simple", ["2"])).toBe(
-    "?simple=1&simple=2&array=2&array=3&boolean"
-  );
-  expect(testOperation(appendValue, "foo", ["bar"])).toBe(
-    "?simple=1&array=2&array=3&boolean&foo=bar"
-  );
-  expect(testOperation(appendValue, "foo", [true])).toBe(
-    "?simple=1&array=2&array=3&boolean&foo"
-  );
-  expect(testOperation(appendValue, "array", ["4", "5"])).toBe(
-    "?simple=1&array=2&array=3&array=4&array=5&boolean"
-  );
-});
-
-test("operation: removeValue", () => {
-  expect(testOperation(removeValue, "simple", ["1"])).toBe(
-    "?array=2&array=3&boolean"
-  );
-  expect(testOperation(removeValue, "simple", ["2"])).toBe(
-    "?simple=1&array=2&array=3&boolean"
-  );
-  expect(testOperation(removeValue, "array", ["2"])).toBe(
-    "?simple=1&array=3&boolean"
-  );
-  expect(testOperation(removeValue, "array", ["2", "3"])).toBe(
-    "?simple=1&boolean"
-  );
-  expect(testOperation(removeValue, "doesntexist", ["1"])).toBe(
-    "?simple=1&array=2&array=3&boolean"
-  );
-});
-
-test("deparseSearch", () => {
-  expect(
-    deparseSearch({
-      simple: ["1"],
-      array: ["2", "3"],
-      boolean: [true],
-    })
-  ).toBe(testSearch);
-  expect(
-    deparseSearch({
-      a: ["1"],
-      b: [true],
-    })
-  ).toBe("?a=1&b");
+  test("operation: removeValue", () => {
+    expect(testOperation(removeValue, "simple")).toBe(
+      "?simple=1&array=2&array=3&boolean"
+    );
+    expect(testOperation(removeValue, "simple", ["1"])).toBe(
+      "?array=2&array=3&boolean"
+    );
+    expect(testOperation(removeValue, "simple", ["2"])).toBe(
+      "?simple=1&array=2&array=3&boolean"
+    );
+    expect(testOperation(removeValue, "array", ["2"])).toBe(
+      "?simple=1&array=3&boolean"
+    );
+    expect(testOperation(removeValue, "array", ["2", "3"])).toBe(
+      "?simple=1&boolean"
+    );
+    expect(testOperation(removeValue, "doesntexist", ["1"])).toBe(
+      "?simple=1&array=2&array=3&boolean"
+    );
+  });
 });
 
 test("getQueryValue", () => {
@@ -249,7 +273,7 @@ test("castToBoolean", () => {
 });
 
 test("type 'string'", () => {
-  const [value, set] = string(testSearch, "simple");
+  const [value, set] = stringFirst(testSearch, "simple");
   expect(value).toBe("1");
   expect(set("2")).toBe("?simple=2&array=2&array=3&boolean");
 });
@@ -261,7 +285,7 @@ test("type 'string[]'", () => {
 });
 
 test("type 'boolean'", () => {
-  const [value, set] = boolean(testSearch, "boolean");
+  const [value, set] = booleanFirst(testSearch, "boolean");
   expect(value).toBe(true);
   expect(set(false)).toBe("?simple=1&array=2&array=3");
 });
@@ -275,7 +299,7 @@ test("type 'boolean[]'", () => {
 test("useSearchValue (single)", () => {
   const [get, set] = useSearchValue("simple", "string")(testSearch);
   const [get2, set2] = useSearchValue("boolean", "boolean")(testSearch);
-  const [get3] = useSearchValue("boolean", "boolean[]")(testSearch);
+  const [get3, set3] = useSearchValue("boolean", "boolean[]")(testSearch);
   const [get4] = useSearchValue("simple", "string[]")(testSearch);
   expect(get).toBe("1");
   expect(get2).toBe(true);
@@ -284,20 +308,21 @@ test("useSearchValue (single)", () => {
   expect(set("2")).toBe("?simple=2&array=2&array=3&boolean");
   expect(set2(false)).toBe("?simple=1&array=2&array=3");
   expect(set("2", set2(false))).toBe("?simple=2&array=2&array=3");
+  expect(set3([true], omit, set("2"))).toBe("?simple=2&array=2&array=3");
 });
 
-// test("useSearchValue", () => {
-// const [get, set] = useSearchValue({
-//   simple: string,
-//   array: stringArray,
-//   boolean: boolean
-// })(testSearch);
-// expect(get).toMatchObject({
-//   simple: "1",
-//   array: ["2", "3"]
-// });
-// expect(set.simple("2")).toBe("?simple=2&array=2&array=3&boolean")
-//   expect(set.simple("3", appendValue, set.simple("5"))).toBe(
-//     "?simple=5&simple=3&array=2&array=3&boolean",
-//   )
-// });
+test("useSearchValues", () => {
+  const [get] = fromSearchShape({
+    simple: stringFirst,
+    array: stringArray,
+    boolean: booleanFirst,
+  })(testSearch);
+  expect(get).toMatchObject({
+    simple: "1",
+    array: ["2", "3"],
+  });
+  // expect(set.simple("2")).toBe("?simple=2&array=2&array=3&boolean");
+  // expect(set.simple("3", appendValue, set.simple("5"))).toBe(
+  //   "?simple=5&simple=3&array=2&array=3&boolean"
+  // );
+});

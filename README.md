@@ -1,22 +1,54 @@
 # youarei
 
-> A composable and fully typed (typescript) libary for working with query strings and paths. If you're bored with writing
-> `(typeof query.foo === 'string')` in your code this might be for you. Comes with some useful casting
-> functions for ensuring you are always getting `boolean`, `boolean[]`, `string`, `string[]` or even a `Date` / `Date[]`.
-> You can easily provide your own [type casting function](#custom-types) to work with your design. Extensively tested with 100% code coverage. Relevant functions are memoized for performance using `mem`
+#### This documentation refers to the `next` branch of youarei which is under alpha release
 
-![](https://travis-ci.com/purge/youarei.js.svg?branch=next)
-![](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
+URL queries are useful, underused, shareable application state. This library is designed to let you define that shape and use it throughout your application, for instance a pagination shape can defined as follows:
+
+```js
+const pageQuery = fromSearchShape({
+  page_number: Y.String,
+  per_page: Y.String,
+  filter: Y.StringArray,
+  search: Y.String,
+});
+```
+
+In your component, you can use this to get the current state by passing in the location search string.
+
+```js
+// you would normally use window.location.search here,
+// or your router location object.
+const [getPageParams, setPageParams] = pageQuery(
+  "?page_number=1&per_page=10&search=test&filter=prime&filter=completed"
+);
+```
+
+`getPageParams` is a fully typed object
+
+```json
+{
+  "page_number": "1",
+  "per_page": "10",
+  "search": "test",
+  "filter": ["prime", "completed"]
+}
+```
+
+later you can update the query using the setter, which is chainable so you can set multiple at once.
+
+```js
+const newSearch = setPageParams.page_number("6");
+// "?page_number=6&per_page=10&search=test&filter=prime&filter=completed"
+// or, using a mutator:
+const newSearch = setPageParams.filter("prime", omit);
+// "?page_number=6&per_page=10&search=test&filter=completed"
+```
 
 ### Examples
 
-[Usage](#example-usage)
-
-[Type Casting](#type-casting)
-
-[Custom Type Casting](#custom-types)
-
 [Mutators](#mutators)
+
+[React Router](#react-router)
 
 ### API
 
@@ -26,15 +58,12 @@
 
 [Installing](#installing)
 
-### Example Usage
+### React Router
 
-While this example uses React, youarei is framework agnostic. There is a react hook-esque helper
-with react-router available if you would prefer to avoid the boilerplate `history.push` and passing of `location`
-the example uses the long-hand method for clarity.
+While this example uses React, youarei is framework agnostic.
 
-```jsx
-
-import useSearchValue, {appendValue, removeValue, string, stringArray, boolean} from 'youarei'
+```tsx
+import {useSearchValue, appendValue, removeValue, string, stringArray, boolean} from 'youarei'
 
 const pageParams = useSearchValue({
   page: string, // ?page=1
@@ -44,7 +73,7 @@ const pageParams = useSearchValue({
 
 const ToggleComponent = ({history, location: {search}}) => {
   const [value, set] = pageParams(search)
-  const setQuery = search => history.push({search})
+  const setSearch = search => history.push({search})
 
   const {
     showDetails, // typed as 'boolean'
@@ -52,11 +81,10 @@ const ToggleComponent = ({history, location: {search}}) => {
     page, //typed as 'string'
   } = value
 
-  const handleChecked = checked => setQuery(set.showDetails(checked))
-  const handlePageChange = e => setQuery(set.page(e.currentTarget.value))
-  const toggleFilter = filterValue => checked =>
-    setQuery(set.filter(
-      e.currentTarget.value,
+  const handleChecked = (checked: boolean) => setSearch(set.showDetails(checked));
+  const handlePageChange = e => setSearch(set.page(e.currentTarget.value));
+  const toggleFilter = (filterValue: number) => (checked: boolean) =>
+    setSearch(set.filter(
       filterValue,
       checked ? removeValue : appendValue
     ))
@@ -89,9 +117,9 @@ You can also set several query parameters at once using the `set()` chain
 ```js
 const pageParams = useSearchValue({
   x: string,
-  y: string
+  y: string,
 })("x=100&y=100");
-set(set.x("150"), set.y("150"));
+set.x("150", set.y("150"));
 ```
 
 If you only want to get a single query value, there is a short-hand option
@@ -102,33 +130,9 @@ value === "bar";
 set("gorch") === "foo=gorch";
 ```
 
-### Type Casting
-
-These types can be provided as a value to the configurator `useSearchValue`
-
-#### string / stringArray
-
-Will always return a string or array of strings
-
-#### boolean / booleanArray
-
-Will always return a string or array of booleans.
-
-#### object
-
-Will always return an object (query string value put through JSON.stringify)
-
-#### Date / DateArray
-
-Will always return a string or array of Dates.
-
-### Custom Types
-
-You can write your own wrapper around an existing
-
 ### Mutators
 
-The following mutators for query data are provided. You can also provide your own matching the same signature.
+The following mutators for query data are provided. You can also provide your own confirming to the exported `Mutator` type.
 
 #### omit
 

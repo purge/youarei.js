@@ -27,22 +27,31 @@
   "author": "Simon Elliott",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "^24.0.23",
-    "@types/node": "^12.12.14",
-    "@types/ramda": "^0.26.36",
-    "jest": "^24.9.0",
-    "ramda": "^0.26.1",
-    "ts-jest": "^24.2.0",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.2",
-    "lodash": "^4.17.15"
+    "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.1",
+    "@types/ramda": "^0.26.44",
+    "jest": "^25.1.0",
+    "lodash": "^4.17.15",
+    "ramda": "^0.27.0",
+    "ts-jest": "^25.2.1",
+    "tslint": "^6.1.0",
+    "type-coverage": "^2.4.2",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "@types/lodash": "^4.14.149",
     "mem": "^6.0.1"
   },
   "scripts": {
-    "test": "jest src",
+    "test": "type-coverage && jest src",
     "build": "tsc --build tsconfig.json"
+  },
+  "typeCoverage": {
+    "atLeast": 100
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "type-coverage"
+    }
   }
 }

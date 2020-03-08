@@ -1,5 +1,11 @@
 import memoize from "mem";
-import { replace, omit, appendValue, removeValue } from "./queryMutators";
+import {
+  replace,
+  omit,
+  appendValue,
+  removeValue,
+  Mutator,
+} from "./queryMutators";
 export { replace, omit, appendValue, removeValue };
 
 const qp_re = /^([^=]+)(?:=(.*))?$/;
@@ -7,12 +13,12 @@ const qp_re = /^([^=]+)(?:=(.*))?$/;
 const cleanValue = (v?: string): string | true =>
   v ? decodeURIComponent(v.replace(/\+/g, " ")) : true;
 
+export type QueryName = string;
 export type SearchString = string;
 export type QueryValueBoolean = boolean;
 export type QueryValueString = string | undefined;
 export type QueryValueAllTypes = QueryValueBoolean | QueryValueString;
-export type QueryValue<ResultType = QueryValueAllTypes> = ResultType;
-export type QueryStruct = { [name: string]: Array<QueryValue> };
+export type QueryStruct = { [name: string]: Array<QueryValueAllTypes> };
 
 export const parseSearch = memoize(
   (_searchString: string): QueryStruct => {
@@ -37,7 +43,7 @@ export const parseSearch = memoize(
   }
 );
 
-export const deparseSearch = memoize((queryObject: QueryStruct) => {
+export const buildSearchString = memoize((queryObject: QueryStruct) => {
   const pairs: string[] = [];
   Object.keys(queryObject).forEach(k => {
     const vArr = queryObject[k];
@@ -54,26 +60,21 @@ export const deparseSearch = memoize((queryObject: QueryStruct) => {
   return pairs.length > 0 ? `?${pairs.join("&")}` : "";
 });
 
-export type QueryResultAsSingle<ResultType = QueryValueAllTypes> = [
-  QueryValue<ResultType>,
-  (input: ResultType, ...args: any) => string
-];
-
 export const nameDoesntExist = [];
 
 export const getQueryValue = (
   rawQuery: SearchString,
-  name: string
-): QueryValue[] => {
+  name: QueryName
+): QueryValueAllTypes[] => {
   const query = parseSearch(rawQuery);
   return query[name] || nameDoesntExist;
 };
 
 type SetQueryValue = (
   rawQuery: SearchString,
-  name: string,
-  value: QueryValue[],
-  operation?: Function
+  name: QueryName,
+  value: QueryValueAllTypes[],
+  operation?: Mutator
 ) => SearchString;
 
 export const setQueryValue: SetQueryValue = (
@@ -81,26 +82,26 @@ export const setQueryValue: SetQueryValue = (
   name,
   value,
   operation = replace
-) => {
-  const query = operation(parseSearch(rawQuery), name, value);
-  return deparseSearch(query);
-};
+) => buildSearchString(operation(parseSearch(rawQuery), name, value));
 
-export type QueryResultAsArray<ResultType = QueryValueAllTypes> = [
-  QueryValue<ResultType>[],
-  Function
+export type QueryResult<ResultType = QueryValueAllTypes> = [
+  ResultType,
+  (
+    value: ResultType,
+    operationOrRawQuery?: SearchString | Mutator,
+    nextRawQuery?: SearchString
+  ) => SearchString
 ];
 
 export const useQueryValue = memoize(
-  (rawQuery: SearchString, name: string): QueryResultAsArray => {
+  (
+    rawQuery: SearchString,
+    name: QueryName
+  ): QueryResult<QueryValueAllTypes[]> => {
     return [
       getQueryValue(rawQuery, name),
-      (
-        value: QueryValue[],
-        operationOrRawQuery?: string | Function,
-        nextRawQuery?: string
-      ): SearchString => {
-        let operation = undefined;
+      (value, operationOrRawQuery, nextRawQuery) => {
+        let operation!: Mutator | undefined;
         let query = nextRawQuery || rawQuery;
 
         if (operationOrRawQuery && typeof operationOrRawQuery === "function") {
@@ -118,77 +119,96 @@ export const useQueryValue = memoize(
   { cacheKey: String }
 );
 
-export const castToString = ([get, set]: QueryResultAsArray<
-  QueryValueAllTypes
->): QueryResultAsArray<QueryValueString> => {
+export const castToString = ([get, set]: QueryResult<
+  QueryValueAllTypes[]
+>): QueryResult<QueryValueString[]> => {
   return [
     get.map(v => (typeof v === "string" ? v : undefined)),
-    (values: QueryValueString[], op: string | Function, next?: string) =>
-      set(values, op, next),
+    (value, op, next) => set(value, op, next),
   ];
 };
 
-export const castToBoolean = ([get, set]: QueryResultAsArray<
-  QueryValueAllTypes
->): QueryResultAsArray<QueryValueBoolean> => {
+export const castToBoolean = ([get, set]: QueryResult<
+  QueryValueAllTypes[]
+>): QueryResult<QueryValueBoolean[]> => {
   return [
     get.map(v => (typeof v === "boolean" ? v : false)),
-    (values: QueryValueBoolean[], op: string | Function, next?: string) =>
-      set(values, op, next),
+    (values, op, next) => set(values, op, next),
   ];
 };
 
-export function castToSingle<ValueType>([get, set]: QueryResultAsArray<
-  ValueType
->): QueryResultAsSingle<ValueType> {
+export function castToSingle<ValueType>([get, set]: QueryResult<
+  ValueType[]
+>): QueryResult<ValueType> {
   return [
     get[0],
-    (value: QueryValue<ValueType>, ...args: any) => set([value], ...args),
+    (value: ValueType, operationOrRawQuery, nextRawQuery) =>
+      set([value], operationOrRawQuery, nextRawQuery),
   ];
 }
 
-export const string = (rawQuery: SearchString, name: string) =>
+export const stringFirst = (rawQuery: SearchString, name: string) =>
   castToSingle(castToString(useQueryValue(rawQuery, name)));
 
 export const stringArray = (rawQuery: SearchString, name: string) =>
   castToString(useQueryValue(rawQuery, name));
 
-export const boolean = (rawQuery: SearchString, name: string) =>
+export const booleanFirst = (rawQuery: SearchString, name: string) =>
   castToSingle(castToBoolean(useQueryValue(rawQuery, name)));
 
 export const booleanArray = (rawQuery: SearchString, name: string) =>
   castToBoolean(useQueryValue(rawQuery, name));
 
 export function useSearchValue(
-  name: string,
+  name: QueryName,
   kind: "string"
-): (search: SearchString) => QueryResultAsSingle<QueryValueString>;
+): (search: SearchString) => QueryResult<QueryValueString>;
 export function useSearchValue(
-  name: string,
-  kind: "boolean"
-): (search: SearchString) => QueryResultAsSingle<boolean>;
-export function useSearchValue(
-  name: string,
-  kind: "boolean[]"
-): (search: SearchString) => QueryResultAsArray<boolean>;
-export function useSearchValue(
-  name: string,
+  name: QueryName,
   kind: "string[]"
-): (search: SearchString) => QueryResultAsArray<QueryValueString>;
+): (search: SearchString) => QueryResult<QueryValueString[]>;
 export function useSearchValue(
-  name: string,
+  name: QueryName,
+  kind: "boolean"
+): (search: SearchString) => QueryResult<QueryValueBoolean>;
+export function useSearchValue(
+  name: QueryName,
+  kind: "boolean[]"
+): (search: SearchString) => QueryResult<QueryValueBoolean[]>;
+export function useSearchValue(
+  name: QueryName,
   kind: "string" | "string[]" | "boolean" | "boolean[]"
 ) {
   return (search: SearchString) => {
     switch (kind) {
       case "string":
-        return string(search, name);
+        return stringFirst(search, name);
       case "string[]":
         return stringArray(search, name);
       case "boolean":
-        return boolean(search, name);
+        return booleanFirst(search, name);
       case "boolean[]":
         return booleanArray(search, name);
     }
+  };
+}
+
+type ConfigType = {
+  [k: string]:
+    | typeof stringFirst
+    | typeof stringArray
+    | typeof booleanFirst
+    | typeof booleanArray;
+};
+
+export function fromSearchShape(config: ConfigType) {
+  return (search: SearchString) => {
+    const get: { [k: string]: unknown } = {};
+    const set: { [k: string]: unknown } = {};
+    for (const q in config) {
+      [get[q], set[q]] = config[q](search, q);
+    }
+
+    return [get, set];
   };
 }

@@ -1,12 +1,15 @@
 import memoize from "mem";
-import { QueryStruct, QueryValue } from "./query";
+import { QueryStruct, QueryValueAllTypes } from "./query";
 
-export const replace = memoize(
-  (
-    queryStruct: QueryStruct,
-    name: string,
-    value: QueryValue[]
-  ): QueryStruct => {
+export type Mutator = (
+  queryStruct: QueryStruct,
+  name: string,
+  value?: QueryValueAllTypes[]
+) => QueryStruct;
+
+export const replace: Mutator = memoize(
+  (queryStruct, name, value) => {
+    if (value === undefined) return queryStruct;
     if (value.length === 1 && value[0] === undefined) {
       return {
         ...queryStruct,
@@ -22,8 +25,8 @@ export const replace = memoize(
   { cacheKey: JSON.stringify }
 );
 
-export const omit = memoize(
-  (queryStruct: QueryStruct, name: string): QueryStruct => {
+export const omit: Mutator = memoize(
+  (queryStruct, name) => {
     if (queryStruct[name]) {
       return {
         ...queryStruct,
@@ -36,14 +39,11 @@ export const omit = memoize(
   { cacheKey: JSON.stringify }
 );
 
-export const removeValue = memoize(
-  (
-    queryStruct: QueryStruct,
-    name: string,
-    value: QueryValue[]
-  ): QueryStruct => {
+export const removeValue: Mutator = memoize(
+  (queryStruct, name, value) => {
+    if (value === undefined) return queryStruct;
     if (queryStruct[name]) {
-      const newValue: QueryValue[] = queryStruct[name].filter(
+      const newValue: QueryValueAllTypes[] = queryStruct[name].filter(
         v => !value.includes(v)
       );
       return {
@@ -57,12 +57,9 @@ export const removeValue = memoize(
   { cacheKey: JSON.stringify }
 );
 
-export const appendValue = memoize(
-  (
-    queryStruct: QueryStruct,
-    name: string,
-    value: QueryValue[]
-  ): QueryStruct => {
+export const appendValue: Mutator = memoize(
+  (queryStruct, name, value) => {
+    if (value === undefined) return queryStruct;
     return {
       ...queryStruct,
       [name]: [...(queryStruct[name] || []), ...value],

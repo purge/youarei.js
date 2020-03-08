@@ -7,5 +7,4 @@ export {
   removeValue,
   appendValue,
   useSearchValue,
-  QueryValue,
 } from "./query";
