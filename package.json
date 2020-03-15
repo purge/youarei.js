@@ -1,30 +1,57 @@
 {
   "name": "youarei",
-  "version": "1.0.3",
-  "description": "URI specialist",
-  "main": "src/youarei.js",
-  "browser": "dist/youarei.min.js",
-  "repository": "https://github.com/purge/youarei.js",
-  "directories": {
-    "test": "test"
+  "version": "2.0.0-alpha.1",
+  "description": "A composable and fully typed libary for working with query strings and paths.",
+  "main": "lib/index.js",
+  "files": [
+    "lib/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/purge/youarei"
   },
+  "bugs": {
+    "url": "https://github.com/purge/youarei/issues"
+  },
+  "homepage": "https://github.com/purge/youarei#readme",
+  "sideEffects": false,
   "keywords": [
     "uri",
     "url",
     "query",
-    "querystring"
+    "querystring",
+    "qs",
+    "search",
+    "router"
   ],
   "author": "Simon Elliott",
   "license": "MIT",
   "devDependencies": {
-    "karma-mocha": "~0.1.0",
-    "karma-chai": "0.0.2",
-    "karma-phantomjs-launcher": "~0.1.0",
-    "karma-coffee-preprocessor": "~0.1.0"
+    "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.1",
+    "@types/ramda": "^0.26.44",
+    "jest": "^25.1.0",
+    "lodash": "^4.17.15",
+    "ramda": "^0.27.0",
+    "ts-jest": "^25.2.1",
+    "tslint": "^6.1.0",
+    "type-coverage": "^2.4.2",
+    "typescript": "^3.8.3"
   },
-  "dependencies": { },
+  "dependencies": {
+    "@types/lodash": "^4.14.149",
+    "mem": "^6.0.1"
+  },
   "scripts": {
-    "test": "karma start",
-    "build-js": "cp src/youarei.js dist/youarei.js && uglifyjs src/youarei.js > dist/youarei.min.js"
+    "test": "type-coverage && jest src",
+    "build": "tsc --build tsconfig.json"
+  },
+  "typeCoverage": {
+    "atLeast": 100
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "type-coverage"
+    }
   }
 }

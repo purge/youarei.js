@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "./lib",
+    "strict": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    "preserveConstEnums": true,
+    "noUnusedLocals": true,
+    "strictFunctionTypes": true,
+    "noImplicitAny": true,
+    "lib": ["esnext"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

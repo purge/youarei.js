@@ -1,194 +1,186 @@
-youarei.js
-==========
+# youarei
 
-A Javascript (UMD, node) module with sane query parameter handling. About 1k gzipped.
+#### This documentation refers to the `next` branch of youarei which is under alpha release
 
-Installing
-==========
+URL queries are useful, underused, shareable application state. This library is designed to let you define that shape and use it throughout your application, for instance a pagination shape can defined as follows:
 
-`npm install youarei`
-
-`bower install youarei`
-
-Example Usage
-===
-
-note: all methods are aliased to camelCase too - query_to_string === queryToString
-
-```javascript
-$ node
-> YouAreI = require('youarei')
-
-// initializing the object
-> var uri = new YouAreI('http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment');
-
-// FORMATTING URI COMPONENTS
-> uri.query_get()
-{ d: 'dad', e: '1', f: '12.3' }
-
-> uri.query_get_all()
-{ d: [ 'dad' ],
-  e: [ '1' ],
-  f: [ '12.3' ]
-
-> uri.query_to_string()
-'d=dad&e=1&f=12.3'
-
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment'
-
-// RETRIEVING URI COMPONENTS
-> uri.scheme()
-'http'
-
-> uri.user_info()
-'user:pass'
-
-> uri.host()
-'www.example.com'
-
-> uri.port()
-'3000'
-
-> uri.path_to_string()
-'/a/b/'
-
-> uri.fragment()
-'fragment'
-
-> uri.path_parts()
-[ 'a', 'b', 'c' ]
-
-> uri.path_to_dir()
-'/a/b/'
-
-// MUTATING THE URI
-// all examples begin fresh with
-> var uri = new YouAreI('http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3#fragment')
-
-{ _scheme: 'http',
-  _authority: 'user:pass@www.example.com:3000',
-  _userinfo: 'user:pass',
-  _port: '3000',
-  _host: 'www.example.com',
-  _path_leading_slash: true,
-  _path_trailing_slash: false,
-  _path: [ 'a', 'b', 'c' ],
-  _fragment: 'fragment',
-  _query: [ [ 'd', 'e', 'f' ], [ 'dad', '1', '12.3' ] ] }
-
-// Replace the query parameters
-> uri.query_set({d: 'mom'})
-> uri.query_get()
-{ d: 'mom' }
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=mom#fragment'
-
-// Append onto the query params
-> uri.query_push({g: 'hello'})
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3&g=hello#fragment'
-> uri.query_get()
-{ d: 'dad', e: '1', f: '12.3', g: 'hello' }
-
-// Watch out for double param keys with query_push()! Although they are useful and in spec unless you are using PHPs flawed querystring parser.
-> uri.query_push({d: 666})
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=dad&e=1&f=12.3&&d=666#fragment'
-> uri.query_get()
-{ d: 'dad', e: '1' }
-> uri.query_get_all()
-{ d: [ '1', '1', 666 ],
-  e: [ '1' ] }
-
-// Append onto or update the query params
-> uri.query_merge({d: 'mom', g: 'hello'})
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c?d=mom&e=1&f=12.3&g=hello#fragment'
-> uri.query_get()
-{ d: 'mom', e: '1', g: 'hello' }
-
-// Clear the query parameters
-> uri.query_get()
-{ d: 'dad', e: '1', f: '12.3' }
-> uri.query_clear()
-> uri.query_get()
-{}
-> uri.to_string()
-'http://user:pass@www.example.com:3000/a/b/c#fragment'
+```js
+const pageQuery = fromSearchShape({
+  page_number: Y.String,
+  per_page: Y.String,
+  filter: Y.StringArray,
+  search: Y.String,
+});
 ```
 
-API (generated from tests)
-===
+In your component, you can use this to get the current state by passing in the location search string.
 
-Note: All methods are aliased to their camelCase alternative.
+```js
+// you would normally use window.location.search here,
+// or your router location object.
+const [getPageParams, setPageParams] = pageQuery(
+  "?page_number=1&per_page=10&search=test&filter=prime&filter=completed"
+);
+```
+
+`getPageParams` is a fully typed object
+
+```json
+{
+  "page_number": "1",
+  "per_page": "10",
+  "search": "test",
+  "filter": ["prime", "completed"]
+}
+```
+
+later you can update the query using the setter, which is chainable so you can set multiple at once.
+
+```js
+const newSearch = setPageParams.page_number("6");
+// "?page_number=6&per_page=10&search=test&filter=prime&filter=completed"
+// or, using a mutator:
+const newSearch = setPageParams.filter("prime", omit);
+// "?page_number=6&per_page=10&search=test&filter=completed"
+```
+
+### Examples
+
+[Mutators](#mutators)
+
+[React Router](#react-router)
+
+### API
+
+[Query String](#example-usage-plain)
+
+[Path](#example-usage-plain)
+
+[Installing](#installing)
+
+### React Router
+
+While this example uses React, youarei is framework agnostic.
+
+```tsx
+import {useSearchValue, appendValue, removeValue, string, stringArray, boolean} from 'youarei'
+
+const pageParams = useSearchValue({
+  page: string, // ?page=1
+  filter: stringArray, // ?filter=a&filter=b
+  showDetails: boolean, // ?showDetails
+})
+
+const ToggleComponent = ({history, location: {search}}) => {
+  const [value, set] = pageParams(search)
+  const setSearch = search => history.push({search})
+
+  const {
+    showDetails, // typed as 'boolean'
+    filter, // typed as 'string[]'
+    page, //typed as 'string'
+  } = value
+
+  const handleChecked = (checked: boolean) => setSearch(set.showDetails(checked));
+  const handlePageChange = e => setSearch(set.page(e.currentTarget.value));
+  const toggleFilter = (filterValue: number) => (checked: boolean) =>
+    setSearch(set.filter(
+      filterValue,
+      checked ? removeValue : appendValue
+    ))
+
+  return (
+    <div>
+      <select onChange={handlePageChange}>
+        <option value="1">Page 1</option>
+        <option value="2">Page 2</option>
+      </select>
+
+      <input
+        checked={showDetails} type="checkbox" onChecked={handleChecked}
+      /> Toggle Full Details
+
+      {[1,2,3,4].map(i => (
+        <input
+          checked={value.filters.contains(i)}
+          type="checkbox"
+          onChecked={toggleFilter(i)}
+        /> Filter {i}
+      ))}
+    </div>
+  )
 
 ```
 
-Start:
-  new YouAreI()
-    ✓ Should accept regular URI (http://www.example.com)
-    ✓ Should accept schemeless URI ( www.example.com )
-    ✗ Should accept empty URI (skipped)
-    ✗ Throw exception on malformed URIs (skipped)
-    ✓ Should be chainable
-    methods
-      URI parts for http://user:pass@www.example.com:3000/a/b/c?d=1&e=1&d=1#fragment
-        toString()
-          ✓ should toString back to source representation
-        scheme()
-          ✓ should return scheme ( http )
-        user_info()
-          ✓ should return userinfo ( user:pass )
-        host()
-          ✓ should return host ( www.example.com )
-        port()
-          ✓ should return port ( 3000 )
-        path_to_string()
-          ✓ should return path ( /a/b/c )
-        fragment()
-          ✓ should return fragment ( fragment )
-      query
-        query_to_string()
-          ✓ should to_string back to source representation
-        query_get()
-          ✓ should return the query dictionary containing the first value of multis
-        query_get_all()
-          ✓ should return query dictionary always using an array regardless, {d: [1,1], e: [1]}
-        query_set()
-          ✓ should merge the new value with the existing query
-          ✓ should replace the entire query with the new value
-          ✓ no parameters should reset the query to blank
-        query_clear()
-          ✓ should clear the query
-        query_push()
-          ✓ should append the new value adding new if it doesn't exist
-          ✓ should append the new value to an existing key if it exists
-        query_merge()
-          ✓ should merge with existing values
-          ✓ should remove key:val if val is set to null
-          ✓ should merge multiple values too, preserving order
-    path
-      path_parts()
-        ✓ should set path
-        ✓ should return array of path parts
-      path_to_dir()
-        ✓ should return the path without script
-        ✓ should return the path without script (with trailing slash)
-      path_basename_set()
-        ✓ should set the basename to value (i.e test.html) after trailing slash
-        ✓ should set the basename to value (i.e test.html)
-      path_extension_set()
-        ✗ should set the extension on basename (skipped)
-        ✗ should throw error when not possible (skipped)
-    partial urls
-      ✓ handles just path
-    clone()
-      ✓ should clone the url
+You can also set several query parameters at once using the `set()` chain
 
-Finished in 0.005 secs
-
-SUMMARY:
-✓ 30 tests completed
-- 4 tests skipped
+```js
+const pageParams = useSearchValue({
+  x: string,
+  y: string,
+})("x=100&y=100");
+set.x("150", set.y("150"));
 ```
+
+If you only want to get a single query value, there is a short-hand option
+
+```js
+const [value, set] = useSearchValue("foo", string)("foo=bar");
+value === "bar";
+set("gorch") === "foo=gorch";
+```
+
+### Mutators
+
+The following mutators for query data are provided. You can also provide your own confirming to the exported `Mutator` type.
+
+#### omit
+
+Omit the named query completely, i.e
+
+```js
+set("test", omit)("?a=b&test=1&test=2") === "?a=b";
+```
+
+#### replace
+
+Replace or add the name + value to the query (default mutator)
+
+```js
+set("test", ["value"], replace)("?a=b&test=1&test=2") === "?a=b&test=value";
+set("new", ["value"], replace)("?a=b&test=&test=2") ===
+  "?a=b&test=&test=2&new=value";
+```
+
+#### appendValue
+
+Append (or create) a value to a named query
+
+```js
+set("test", ["value"], appendValue)("?a=b&test=1&test=2") ===
+  "?a=b&test=1&test=2&test=value";
+set("test", ["value", "value2"], appendValue)("?a=b&test=1&test=2") ===
+  "?a=b&test=1&test=2&test=value&test=value2";
+set("new", ["value"], appendValue)("?a=b&test=1&test=2") ===
+  "?a=b&test=1&test=2&new=value";
+```
+
+#### removeValue
+
+remove value from a named query
+
+```js
+set("test", ["1"], removeValue)("?a=b&test=1&test=2") ===
+  "?a=b&test=2&test=value";
+set("test", ["1", "2"], removeValue)("?a=b&test=1&test=2") === "?a=b";
+```
+
+### Install
+
+```
+$ yarn add youarei
+```
+
+### Licence
+
+MIT &copy; Simon Elliott
